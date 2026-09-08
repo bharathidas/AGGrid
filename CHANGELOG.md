@@ -2,6 +2,12 @@
 
 All notable changes to the AGGrid widget are documented here.
 
+## [1.1.2] - 2026-09-08
+
+### Fixed
+
+- Server data loading: the first page stayed on "1 to ? of More" when the data source already held the requested page (for example after Mendix restored the page state), until a microflow refreshed it. Requests the data source already satisfies now resolve immediately.
+
 ## [1.1.1] - 2026-09-08
 
 ### Added

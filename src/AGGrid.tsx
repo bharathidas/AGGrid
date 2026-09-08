@@ -57,7 +57,7 @@ import {
 } from "ag-grid-community";
 import classNames from "classnames";
 import { Big } from "big.js";
-import { ObjectItem } from "mendix";
+import { ListValue, ObjectItem } from "mendix";
 
 import { ColumnsType, AGGridContainerProps } from "../typings/AGGridProps";
 import { ColumnChooser, ChooserColumn } from "./components/ColumnChooser";
@@ -408,6 +408,38 @@ export function AGGrid(props: AGGridContainerProps): ReactElement {
     const reloadPending = useRef(false);
     const [serverEmpty, setServerEmpty] = useState(false);
 
+    // Hands the pending block to AG Grid when the data source holds exactly what was asked for
+    // (same offset, limit, sort order and filter). Returns false when it does not (yet).
+    const resolveRef = useRef<(ds: ListValue) => boolean>(() => false);
+    resolveRef.current = (ds: ListValue): boolean => {
+        const pending = pendingRequest.current;
+        if (!pending || ds.status !== "available") {
+            return false;
+        }
+        const matches =
+            ds.offset === pending.offset &&
+            ds.limit === pending.limit &&
+            JSON.stringify(ds.sortOrder) === pending.sortOrder &&
+            JSON.stringify(ds.filter ?? null) === pending.filter;
+        if (!matches) {
+            return false;
+        }
+        const block = buildRows(ds.items, columnsRef.current);
+        const total = ds.totalCount;
+        const lastRow = total !== undefined ? total : block.length < pending.limit ? pending.offset + block.length : -1;
+        pendingRequest.current = null;
+        pending.params.successCallback(block, lastRow);
+        if (pending.offset === 0) {
+            setServerEmpty(block.length === 0);
+            if (block.length === 0) {
+                apiRef.current?.showNoRowsOverlay();
+            } else {
+                apiRef.current?.hideOverlay();
+            }
+        }
+        return true;
+    };
+
     const processQueue = useCallback(() => {
         if (pendingRequest.current || requestQueue.current.length === 0) {
             return;
@@ -429,6 +461,12 @@ export function AGGrid(props: AGGridContainerProps): ReactElement {
         ds.setOffset(params.startRow);
         ds.setLimit(limit);
         ds.requestTotalCount(true);
+        // When the data source already holds this exact page (for example on the first request after
+        // Mendix restored the page state), the setters change nothing, no re-render follows and the
+        // effect below never runs: resolve from what the data source has right now.
+        if (resolveRef.current(ds)) {
+            processQueue();
+        }
     }, []);
 
     const serverDatasource = useMemo<IDatasource>(
@@ -467,28 +505,9 @@ export function AGGrid(props: AGGridContainerProps): ReactElement {
         if (datasource.status !== "available") {
             return;
         }
-        const matches =
-            datasource.offset === pending.offset &&
-            datasource.limit === pending.limit &&
-            JSON.stringify(datasource.sortOrder) === pending.sortOrder &&
-            JSON.stringify(datasource.filter ?? null) === pending.filter;
-        if (!matches) {
-            return;
+        if (resolveRef.current(datasource)) {
+            processQueue();
         }
-        const block = buildRows(items, columnsRef.current);
-        const total = datasource.totalCount;
-        const lastRow = total !== undefined ? total : block.length < pending.limit ? pending.offset + block.length : -1;
-        pendingRequest.current = null;
-        pending.params.successCallback(block, lastRow);
-        if (pending.offset === 0) {
-            setServerEmpty(block.length === 0);
-            if (block.length === 0) {
-                api?.showNoRowsOverlay();
-            } else {
-                api?.hideOverlay();
-            }
-        }
-        processQueue();
     }, [serverMode, datasource, items, processQueue]);
 
     // Quick search in server mode goes to the data source: refetch after the user stops typing.
