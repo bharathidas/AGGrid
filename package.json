@@ -1,7 +1,7 @@
 {
     "name": "aggrid-web",
     "widgetName": "AGGrid",
-    "version": "1.1.2",
+    "version": "1.0.0",
     "description": "A Mendix data grid powered by AG Grid Community: sorting, filtering, quick search, pagination, inline editing, row selection, column pinning and reordering, row drag, CSV export, totals row, themes and more.",
     "copyright": "© MX Techies 2026",
     "license": "Apache-2.0",
