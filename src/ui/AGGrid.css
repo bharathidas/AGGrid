@@ -1,0 +1,418 @@
+.mxt-ag-grid {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    /* Atlas page containers are flex columns; never let them shrink the configured grid height. */
+    flex-shrink: 0;
+}
+
+/* Fixed height: the grid area fills whatever height the wrapper was given. */
+.mxt-ag-grid--normal .mxt-ag-grid__grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+}
+
+.mxt-ag-grid--autoHeight .mxt-ag-grid__grid,
+.mxt-ag-grid--print .mxt-ag-grid__grid {
+    flex: 0 0 auto;
+}
+
+.mxt-ag-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.mxt-ag-toolbar__search {
+    flex: 1 1 220px;
+    max-width: 360px;
+}
+
+.mxt-ag-toolbar__buttons {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* Toolbar buttons: inline SVG icon followed by the (translatable) label.
+   The selectors outrank Atlas's .btn { display: inline-block } so the flex layout wins. */
+.mxt-ag-toolbar .btn.mxt-ag-btn,
+.mxt-ag-toolbar .mxt-ag-chooser .btn.mxt-ag-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mxt-ag-btn .mxt-ag-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    margin-right: 6px;
+    /* Fallback alignment when the button is not laid out as flex. */
+    vertical-align: -2px;
+}
+
+/* Alignment classes applied per column. */
+.mxt-ag-align-right {
+    text-align: right;
+}
+
+.mxt-ag-align-right .ag-cell-value {
+    justify-content: flex-end;
+}
+
+.mxt-ag-align-center {
+    text-align: center;
+}
+
+.mxt-ag-align-center .ag-cell-value {
+    justify-content: center;
+}
+
+/* Custom content cells: let Mendix widgets lay out normally. */
+.mxt-ag-cell-custom {
+    line-height: normal;
+    display: flex;
+    align-items: center;
+}
+
+.mxt-ag-cell-custom .ag-cell-value {
+    width: 100%;
+}
+
+.mxt-ag-cell-custom .form-group,
+.mxt-ag-cell-custom .btn {
+    margin: 0;
+}
+
+/* "Render as" cells. */
+.mxt-ag-cell-link a {
+    text-decoration: underline;
+}
+
+.mxt-ag-cell-badge .badge {
+    display: inline-block;
+    line-height: 1.4;
+}
+
+.mxt-ag-cell-progress .ag-cell-value,
+.mxt-ag-cell-image .ag-cell-value {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.mxt-ag-cell-progress .progress {
+    width: 100%;
+    height: 16px;
+    margin: 0;
+    background-color: rgba(128, 128, 128, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.mxt-ag-cell-progress .progress-bar {
+    height: 100%;
+    background-color: var(--mxt-ag-accent, #264ae5);
+    color: #fff;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    white-space: nowrap;
+    transition: width 0.2s ease;
+}
+
+.mxt-ag-cell-image img {
+    max-height: calc(100% - 4px);
+    max-width: 100%;
+    object-fit: contain;
+}
+
+/* Mendix validation feedback after an inline edit. */
+.mxt-ag-cell-invalid {
+    box-shadow: inset 0 0 0 1px #d32f2f;
+    background-color: rgba(211, 47, 47, 0.08);
+}
+
+.mxt-ag-rownum {
+    color: var(--ag-header-text-color, #6c757d);
+    font-variant-numeric: tabular-nums;
+}
+
+.mxt-ag-row-totals {
+    font-weight: 600;
+}
+
+.mxt-ag-norows {
+    padding: 12px;
+}
+
+/* ---- Atlas / Data Grid 2 look --------------------------------------------------------- */
+.mxt-ag-grid--atlas {
+    font-family: inherit;
+}
+
+.mxt-ag-grid--atlas .mxt-ag-toolbar {
+    margin-bottom: 12px;
+}
+
+/* Header captions and sort icons like Data Grid 2: bold caption, muted icons. */
+.mxt-ag-grid--atlas .ag-header-cell-text {
+    font-weight: 600;
+}
+
+.mxt-ag-grid--atlas .ag-header-icon,
+.mxt-ag-grid--atlas .ag-sort-indicator-icon {
+    color: #6c7180;
+}
+
+/* Data Grid 2 style paging bar. */
+.mxt-ag-pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 8px 0;
+    border-top: 1px solid #ced0d3;
+    font-size: 14px;
+    color: #0a1325;
+}
+
+.mxt-ag-pager__size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-weight: normal;
+}
+
+.mxt-ag-pager__size .form-control {
+    width: auto;
+    height: 32px;
+    padding: 4px 8px;
+}
+
+.mxt-ag-pager__nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mxt-ag-pager__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #0a1325;
+}
+
+.mxt-ag-pager__btn:hover:not(:disabled) {
+    background-color: #f5f6f6;
+    border-color: #ced0d3;
+}
+
+.mxt-ag-pager__btn:disabled {
+    color: #ced0d3;
+    cursor: not-allowed;
+}
+
+.mxt-ag-pager__status {
+    padding: 0 8px;
+    white-space: nowrap;
+}
+
+/* Dark schemes keep the AG Grid colors for the pager. */
+.mxt-ag-grid--dark .mxt-ag-pager {
+    border-top-color: #4a4f57;
+    color: #f0f0f0;
+}
+
+.mxt-ag-grid--dark .mxt-ag-pager__btn {
+    color: #f0f0f0;
+}
+
+.mxt-ag-grid--dark .mxt-ag-pager__btn:hover:not(:disabled) {
+    background-color: #2a2d33;
+    border-color: #4a4f57;
+}
+
+.mxt-ag-grid--dark .mxt-ag-pager__btn:disabled {
+    color: #6c7180;
+}
+
+/* ---- Toolbar extras: selection counter and column chooser ---------------------------------- */
+.mxt-ag-toolbar__selection {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+}
+
+.mxt-ag-toolbar__clear {
+    padding: 0 4px;
+}
+
+.mxt-ag-chooser {
+    position: relative;
+}
+
+.mxt-ag-chooser__menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 1050;
+    min-width: 200px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 8px 0;
+    background: #ffffff;
+    border: 1px solid #ced0d3;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mxt-ag-chooser__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 6px 12px;
+    font-weight: normal;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.mxt-ag-chooser__item:hover {
+    background: #f5f6f6;
+}
+
+.mxt-ag-chooser__item input {
+    margin: 0;
+}
+
+.mxt-ag-grid--dark .mxt-ag-chooser__menu {
+    background: #1f2229;
+    border-color: #4a4f57;
+    color: #f0f0f0;
+}
+
+.mxt-ag-grid--dark .mxt-ag-chooser__item:hover {
+    background: #2a2d33;
+}
+
+/* Dropdown floating filter for enumeration and boolean columns. */
+.mxt-ag-select-filter {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.mxt-ag-select-filter__select {
+    width: 100%;
+    height: calc(var(--ag-spacing, 8px) * 3 + 4px);
+    padding: 0 4px;
+}
+
+/* Empty placeholder shown instead of the grid body. */
+.mxt-ag-grid__empty {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px;
+}
+
+/* ---- Data Grid 2 style floating filters (Atlas theme) ------------------------------------- */
+.mxt-ag-grid--atlas .ag-floating-filter {
+    padding: 0 8px;
+}
+
+.mxt-ag-grid--atlas .ag-floating-filter-body,
+.mxt-ag-grid--atlas .ag-floating-filter-full-body {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.mxt-ag-grid--atlas .mxt-ag-dg-filter {
+    width: 100%;
+    overflow: visible;
+}
+
+.mxt-ag-grid--atlas .mxt-ag-dg-filter .form-control {
+    height: 36px;
+    min-width: 0;
+    font-size: 14px;
+}
+
+.mxt-ag-grid--atlas .filter-selector {
+    position: relative;
+    display: flex;
+}
+
+.mxt-ag-grid--atlas .filter-selector-button {
+    height: 36px;
+    min-width: 36px;
+}
+
+/* Atlas paints the dropdown arrow at the edge of the content box, on top of the last letters of the
+   selected caption. Paint it inside the right padding instead, with room for the text to end first. */
+.mxt-ag-grid--atlas .mxt-ag-select-filter .form-control {
+    padding-left: 6px;
+    padding-right: 28px;
+    background-origin: padding-box;
+    background-position: right 8px center;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* The operator list is rendered in the document body so the grid header cannot clip it. */
+.mxt-ag-dg-filter__menu {
+    z-index: 1100;
+}
+
+.mxt-ag-dg-filter__menu .filter-listitem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.mxt-ag-dg-filter__menu .filter-listitem:hover,
+.mxt-ag-dg-filter__menu .filter-listitem.filter-selected {
+    background-color: #f5f6f6;
+}
+
+/* Narrow columns: the Data Grid 2 filter shrinks with the cell instead of overflowing it. */
+.mxt-ag-grid--atlas .ag-floating-filter-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.mxt-ag-grid--atlas .mxt-ag-dg-filter {
+    min-width: 0;
+}
+
+.mxt-ag-grid--atlas .mxt-ag-dg-filter .filter-input,
+.mxt-ag-grid--atlas .mxt-ag-select-filter .form-control {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+}
+
+.mxt-ag-grid--atlas .mxt-ag-dg-filter .filter-selector {
+    flex: 0 0 auto;
+}

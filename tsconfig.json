@@ -1,0 +1,10 @@
+{
+    "extends": "@mendix/pluggable-widgets-tools/configs/tsconfig.base.json",
+    "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "./dist/tmp",
+        "rootDir": "./"
+    },
+    "include": ["./src", "./typings"],
+    "exclude": ["./src/__tests__", "./src/__mocks__"]
+}

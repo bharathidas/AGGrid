@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="com.mxtechies.widget.web.aggrid.AGGrid" pluginWidget="true" offlineCapable="true" supportedPlatform="Web" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>AGGrid</name>
+    <description>Data grid powered by AG Grid Community: sorting, filtering, quick search, pagination, inline editing, selection, pinning, reordering, row drag, CSV export, totals and themes.</description>
+    <studioProCategory>Data containers</studioProCategory>
+    <studioCategory>Data containers</studioCategory>
+    <properties>
+        <propertyGroup caption="General">
+            <propertyGroup caption="Data source">
+                <property key="datasource" type="datasource" isList="true" required="true">
+                    <caption>Data source</caption>
+                    <description>The objects shown as rows.</description>
+                </property>
+                <property key="dataMode" type="enumeration" defaultValue="client">
+                    <caption>Data loading</caption>
+                    <description>Browser: all rows are loaded once and sorted, filtered and paged in the browser (fast interaction, best up to some thousands of rows). Server: the data source pages, sorts and filters like Data Grid 2, so any number of rows works; quick search, floating filters and header sorting are sent to the data source.</description>
+                    <enumerationValues>
+                        <enumerationValue key="client">Browser</enumerationValue>
+                        <enumerationValue key="server">Server (paged, like Data Grid 2)</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="rowLimit" type="integer" defaultValue="0">
+                    <caption>Max rows to load</caption>
+                    <description>Browser loading only: maximum number of objects retrieved from the data source. 0 loads all objects.</description>
+                </property>
+                <property key="refreshInterval" type="integer" defaultValue="0">
+                    <caption>Refresh time (seconds)</caption>
+                    <description>Reloads the data source every given number of seconds. 0 disables automatic refresh.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Columns">
+                <property key="columns" type="object" isList="true" required="false">
+                    <caption>Columns</caption>
+                    <description>The columns of the grid.</description>
+                    <properties>
+                        <propertyGroup caption="General">
+                            <propertyGroup caption="Content">
+                                <property key="columnType" type="enumeration" defaultValue="attribute">
+                                    <caption>Show</caption>
+                                    <description>Attribute: value of an attribute (sortable, filterable, editable). Dynamic text: an expression per row. Custom content: any widgets per row.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="attribute">Attribute</enumerationValue>
+                                        <enumerationValue key="dynamicText">Dynamic text</enumerationValue>
+                                        <enumerationValue key="customContent">Custom content</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                                <property key="attribute" type="attribute" dataSource="../datasource" required="false">
+                                    <caption>Attribute</caption>
+                                    <description>The attribute shown in this column.</description>
+                                    <attributeTypes>
+                                        <attributeType name="String" />
+                                        <attributeType name="Integer" />
+                                        <attributeType name="Long" />
+                                        <attributeType name="Decimal" />
+                                        <attributeType name="AutoNumber" />
+                                        <attributeType name="Boolean" />
+                                        <attributeType name="DateTime" />
+                                        <attributeType name="Enum" />
+                                        <attributeType name="HashString" />
+                                    </attributeTypes>
+                                </property>
+                                <property key="dynamicText" type="expression" dataSource="../datasource" required="false">
+                                    <caption>Dynamic text</caption>
+                                    <description>Text shown in this column, evaluated per row.</description>
+                                    <returnType type="String" />
+                                </property>
+                                <property key="content" type="widgets" dataSource="../datasource" required="false">
+                                    <caption>Custom content</caption>
+                                    <description>Widgets rendered in this column for every row.</description>
+                                </property>
+                                <property key="header" type="textTemplate" required="false">
+                                    <caption>Caption</caption>
+                                    <description>Column header. Defaults to the attribute name.</description>
+                                </property>
+                                <property key="headerGroup" type="string" required="false">
+                                    <caption>Header group</caption>
+                                    <description>Adjacent columns with the same header group text are grouped under one spanning header.</description>
+                                </property>
+                                <property key="tooltip" type="expression" dataSource="../datasource" required="false">
+                                    <caption>Tooltip</caption>
+                                    <description>Tooltip shown when hovering a cell, evaluated per row.</description>
+                                    <returnType type="String" />
+                                </property>
+                                <property key="renderAs" type="enumeration" defaultValue="text">
+                                    <caption>Render as</caption>
+                                    <description>Text shows the formatted value. Link opens the value as a URL in a new tab. Badge shows the value as an Atlas badge (add a cell class such as 'badge-success' to color it). Progress shows a numeric value between 0 and 100 as a bar. Image shows the value as an image URL.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="text">Text</enumerationValue>
+                                        <enumerationValue key="link">Link</enumerationValue>
+                                        <enumerationValue key="badge">Badge</enumerationValue>
+                                        <enumerationValue key="progress">Progress bar</enumerationValue>
+                                        <enumerationValue key="image">Image</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                                <property key="attributeName" type="string" required="false">
+                                    <caption>Attribute name (editing)</caption>
+                                    <description>Only needed for inline editing when the widget cannot tell which attribute to write (all loaded rows have the same value in several attributes of the same type). Enter the attribute name, e.g. Department.</description>
+                                </property>
+                                <property key="totalAttribute" type="attribute" dataSource="../totalsDatasource" required="false">
+                                    <caption>Total from data source</caption>
+                                    <description>Attribute of the totals data source (Appearance &gt; Totals row) shown in the totals row for this column. Used when 'Totals from' is set to 'Data source'.</description>
+                                    <attributeTypes>
+                                        <attributeType name="String" />
+                                        <attributeType name="Integer" />
+                                        <attributeType name="Long" />
+                                        <attributeType name="Decimal" />
+                                        <attributeType name="AutoNumber" />
+                                        <attributeType name="Boolean" />
+                                        <attributeType name="DateTime" />
+                                        <attributeType name="Enum" />
+                                    </attributeTypes>
+                                </property>
+                            </propertyGroup>
+                            <propertyGroup caption="Size">
+                                <property key="widthMode" type="enumeration" defaultValue="flex">
+                                    <caption>Width</caption>
+                                    <description>Flex shares the free space in proportion to the flex value. Fixed uses the pixel width. Auto sizes to the content when the grid loads.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="flex">Flex</enumerationValue>
+                                        <enumerationValue key="fixed">Fixed (px)</enumerationValue>
+                                        <enumerationValue key="auto">Auto (fit content)</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                                <property key="flex" type="integer" defaultValue="1">
+                                    <caption>Flex</caption>
+                                    <description>Relative share of the free width.</description>
+                                </property>
+                                <property key="width" type="integer" defaultValue="150">
+                                    <caption>Width (px)</caption>
+                                    <description>Fixed column width in pixels.</description>
+                                </property>
+                                <property key="minWidth" type="integer" defaultValue="0">
+                                    <caption>Min width (px)</caption>
+                                    <description>0 uses the grid default.</description>
+                                </property>
+                                <property key="maxWidth" type="integer" defaultValue="0">
+                                    <caption>Max width (px)</caption>
+                                    <description>0 means no maximum.</description>
+                                </property>
+                            </propertyGroup>
+                        </propertyGroup>
+                        <propertyGroup caption="Behavior">
+                            <propertyGroup caption="Behavior">
+                                <property key="sortable" type="boolean" defaultValue="true">
+                                    <caption>Sortable</caption>
+                                    <description>Click the header to sort. Hold Shift (or see 'Multi sort') to sort on several columns.</description>
+                                </property>
+                                <property key="filterType" type="enumeration" defaultValue="auto">
+                                    <caption>Filter</caption>
+                                    <description>Filter shown in the column menu and as floating filter. Auto picks text, number or date from the attribute type.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="auto">Auto</enumerationValue>
+                                        <enumerationValue key="text">Text</enumerationValue>
+                                        <enumerationValue key="number">Number</enumerationValue>
+                                        <enumerationValue key="date">Date</enumerationValue>
+                                        <enumerationValue key="none">None</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                                <property key="editable" type="expression" dataSource="../datasource" required="false" defaultValue="false">
+                                    <caption>Editable</caption>
+                                    <description>Whether cells in this column can be edited, evaluated per row. Attribute columns only. Values are written to the attribute immediately.</description>
+                                    <returnType type="Boolean" />
+                                </property>
+                                <property key="pinned" type="enumeration" defaultValue="none">
+                                    <caption>Pinned</caption>
+                                    <description>Keeps the column visible while scrolling horizontally.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="none">Not pinned</enumerationValue>
+                                        <enumerationValue key="left">Left</enumerationValue>
+                                        <enumerationValue key="right">Right</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                                <property key="visible" type="expression" required="false" defaultValue="true">
+                                    <caption>Visible</caption>
+                                    <description>Hides the column when false.</description>
+                                    <returnType type="Boolean" />
+                                </property>
+                                <property key="resizable" type="boolean" defaultValue="true">
+                                    <caption>Resizable</caption>
+                                    <description>Lets the user drag the header edge to resize the column.</description>
+                                </property>
+                                <property key="movable" type="boolean" defaultValue="true">
+                                    <caption>Movable</caption>
+                                    <description>Lets the user drag the header to reorder columns.</description>
+                                </property>
+                                <property key="aggregate" type="enumeration" defaultValue="none">
+                                    <caption>Totals row value</caption>
+                                    <description>Value shown for this column in the totals row (see Appearance &gt; Totals row). Calculated over the rows that pass the current filter.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="none">None</enumerationValue>
+                                        <enumerationValue key="sum">Sum</enumerationValue>
+                                        <enumerationValue key="avg">Average</enumerationValue>
+                                        <enumerationValue key="min">Minimum</enumerationValue>
+                                        <enumerationValue key="max">Maximum</enumerationValue>
+                                        <enumerationValue key="count">Count</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                            </propertyGroup>
+                        </propertyGroup>
+                        <propertyGroup caption="Appearance">
+                            <propertyGroup caption="Appearance">
+                                <property key="alignment" type="enumeration" defaultValue="auto">
+                                    <caption>Alignment</caption>
+                                    <description>Auto right-aligns numbers and centers booleans.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="auto">Auto</enumerationValue>
+                                        <enumerationValue key="left">Left</enumerationValue>
+                                        <enumerationValue key="center">Center</enumerationValue>
+                                        <enumerationValue key="right">Right</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                                <property key="decimalPrecision" type="integer" defaultValue="-1">
+                                    <caption>Decimal precision</caption>
+                                    <description>Number of decimals shown for numeric attributes. -1 keeps the default Mendix formatting.</description>
+                                </property>
+                                <property key="groupDigits" type="boolean" defaultValue="false">
+                                    <caption>Group digits</caption>
+                                    <description>Shows thousands separators for numeric attributes.</description>
+                                </property>
+                                <property key="wrapText" type="boolean" defaultValue="false">
+                                    <caption>Wrap text</caption>
+                                    <description>Wraps long values instead of clipping them. Combine with 'Auto row height'.</description>
+                                </property>
+                                <property key="autoHeight" type="boolean" defaultValue="false">
+                                    <caption>Auto row height</caption>
+                                    <description>Rows grow to fit the content of this column.</description>
+                                </property>
+                                <property key="cellClass" type="expression" dataSource="../datasource" required="false">
+                                    <caption>Cell class</caption>
+                                    <description>CSS class(es) added to the cell, evaluated per row. Use for conditional formatting.</description>
+                                    <returnType type="String" />
+                                </property>
+                            </propertyGroup>
+                        </propertyGroup>
+                        <propertyGroup caption="Events">
+                            <propertyGroup caption="Events">
+                                <property key="onClick" type="action" dataSource="../datasource" required="false">
+                                    <caption>On click</caption>
+                                    <description>Runs when a cell in this column is clicked.</description>
+                                </property>
+                                <property key="onChange" type="action" dataSource="../datasource" required="false">
+                                    <caption>On change</caption>
+                                    <description>Runs after an edited value in this column is written to the attribute. The variables New value and Old value hold the values as text.</description>
+                                    <actionVariables>
+                                        <actionVariable key="newValue" type="String" caption="New value" />
+                                        <actionVariable key="oldValue" type="String" caption="Old value" />
+                                    </actionVariables>
+                                </property>
+                            </propertyGroup>
+                        </propertyGroup>
+                    </properties>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Selection">
+                <property key="selection" type="selection" dataSource="datasource" onChange="onSelectionChange">
+                    <caption>Selection</caption>
+                    <description>Whether the user can select one row, several rows, or none.</description>
+                    <selectionTypes>
+                        <selectionType name="None" />
+                        <selectionType name="Single" />
+                        <selectionType name="Multi" />
+                    </selectionTypes>
+                </property>
+                <property key="checkboxSelection" type="boolean" defaultValue="true">
+                    <caption>Selection checkboxes</caption>
+                    <description>Shows a checkbox column for selecting rows.</description>
+                </property>
+                <property key="headerCheckbox" type="boolean" defaultValue="true">
+                    <caption>Select all checkbox</caption>
+                    <description>Shows a checkbox in the header that selects or deselects all (filtered) rows. Multi selection only.</description>
+                </property>
+                <property key="clickSelection" type="boolean" defaultValue="true">
+                    <caption>Select on row click</caption>
+                    <description>Clicking a row selects it. Ctrl/Cmd-click and Shift-click extend a multi selection.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Features">
+            <propertyGroup caption="Toolbar">
+                <property key="showQuickFilter" type="boolean" defaultValue="true">
+                    <caption>Quick search</caption>
+                    <description>Shows a search box above the grid that filters all columns.</description>
+                </property>
+                <property key="quickFilterPlaceholder" type="textTemplate" required="false">
+                    <caption>Search placeholder</caption>
+                    <description>Placeholder text shown in the empty search box.</description>
+                    <translations>
+                        <translation lang="en_US">Search...</translation>
+                    </translations>
+                </property>
+                <property key="quickFilterAttribute" type="attribute" required="false">
+                    <caption>Search attribute</caption>
+                    <description>Optional String attribute that holds the quick search text, so another widget (for example a text box) can drive the search.</description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="showExportButton" type="boolean" defaultValue="true">
+                    <caption>Export button</caption>
+                    <description>Downloads the filtered and sorted rows. With server data loading all matching rows are fetched first (up to 50,000).</description>
+                </property>
+                <property key="exportFormat" type="enumeration" defaultValue="both">
+                    <caption>Export format</caption>
+                    <description>Excel (.xlsx with real numbers, dates and booleans, bold header, frozen header row and auto filter), CSV, or a button for each.</description>
+                    <enumerationValues>
+                        <enumerationValue key="excel">Excel</enumerationValue>
+                        <enumerationValue key="csv">CSV</enumerationValue>
+                        <enumerationValue key="both">Excel and CSV</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="exportFileName" type="string" defaultValue="export">
+                    <caption>Export file name</caption>
+                    <description>File name without the extension. Also used as the Excel sheet name.</description>
+                </property>
+                <property key="showResetButton" type="boolean" defaultValue="true">
+                    <caption>Reset button</caption>
+                    <description>Clears filters, sorting and restores the column layout.</description>
+                </property>
+                <property key="showRefreshButton" type="boolean" defaultValue="false">
+                    <caption>Refresh button</caption>
+                    <description>Reloads the data source.</description>
+                </property>
+                <property key="showColumnChooser" type="boolean" defaultValue="true">
+                    <caption>Columns button</caption>
+                    <description>Lets the user show and hide columns. The choice is kept in the column state attribute when one is configured.</description>
+                </property>
+                <property key="showSelectionCount" type="boolean" defaultValue="true">
+                    <caption>Selection count</caption>
+                    <description>Shows how many rows are selected and a button to clear the selection.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Sorting and filtering">
+                <property key="alwaysMultiSort" type="boolean" defaultValue="false">
+                    <caption>Multi sort without Shift</caption>
+                    <description>Clicking several headers sorts on all of them. When off, hold Shift to add a column to the sort.</description>
+                </property>
+                <property key="floatingFilters" type="boolean" defaultValue="true">
+                    <caption>Floating filters</caption>
+                    <description>Shows a filter input under each column header.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Pagination">
+                <property key="pagination" type="boolean" defaultValue="true">
+                    <caption>Pagination</caption>
+                    <description>Shows the loaded rows in pages with a pager under the grid.</description>
+                </property>
+                <property key="pageSize" type="integer" defaultValue="20">
+                    <caption>Page size</caption>
+                    <description>Number of rows per page.</description>
+                </property>
+                <property key="pageSizeSelector" type="string" defaultValue="10,20,50,100">
+                    <caption>Page size choices</caption>
+                    <description>Comma-separated page sizes the user can pick. Leave empty to hide the selector.</description>
+                </property>
+                <property key="autoPageSize" type="boolean" defaultValue="false">
+                    <caption>Auto page size</caption>
+                    <description>Fits as many rows per page as the grid height allows (fixed height layout only).</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Editing">
+                <property key="editType" type="enumeration" defaultValue="cell">
+                    <caption>Edit mode</caption>
+                    <description>Cell edits one cell at a time. Full row puts every editable cell of the row in edit mode.</description>
+                    <enumerationValues>
+                        <enumerationValue key="cell">Cell</enumerationValue>
+                        <enumerationValue key="fullRow">Full row</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="singleClickEdit" type="boolean" defaultValue="false">
+                    <caption>Single click edit</caption>
+                    <description>Starts editing on a single click instead of a double click.</description>
+                </property>
+                <property key="commitMode" type="enumeration" defaultValue="none">
+                    <caption>Commit</caption>
+                    <description>What happens after a cell is edited. Keep in client: the change stays in the client until a Save button or another commit persists it. Commit directly: the widget saves the object. Run On commit action: the changed object is passed to the On commit action (a microflow or nanoflow that validates and commits).</description>
+                    <enumerationValues>
+                        <enumerationValue key="none">Keep in client</enumerationValue>
+                        <enumerationValue key="client">Commit directly</enumerationValue>
+                        <enumerationValue key="action">Run On commit action</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="onCommit" type="action" dataSource="datasource" required="false">
+                    <caption>On commit</caption>
+                    <description>Runs with the changed object after an inline edit when Commit is 'Run On commit action'. Receives the variables New value, Old value and Attribute name.</description>
+                    <actionVariables>
+                        <actionVariable key="newValue" type="String" caption="New value" />
+                        <actionVariable key="oldValue" type="String" caption="Old value" />
+                        <actionVariable key="attributeName" type="String" caption="Attribute name" />
+                    </actionVariables>
+                </property>
+                <property key="undoRedo" type="boolean" defaultValue="true">
+                    <caption>Undo / redo</caption>
+                    <description>Ctrl+Z and Ctrl+Y undo and redo cell edits made in this grid.</description>
+                </property>
+                <property key="enterNavigatesVertically" type="boolean" defaultValue="true">
+                    <caption>Enter moves down</caption>
+                    <description>Enter moves to the cell below (like a spreadsheet) instead of staying on the cell.</description>
+                </property>
+                <property key="flashOnChange" type="boolean" defaultValue="true">
+                    <caption>Flash changed cells</caption>
+                    <description>Briefly highlights a cell when its value changes.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Columns">
+                <property key="autoSizeStrategy" type="enumeration" defaultValue="none">
+                    <caption>Auto size</caption>
+                    <description>Fit grid width scales columns to fill the grid. Fit cell contents sizes each column to its content.</description>
+                    <enumerationValues>
+                        <enumerationValue key="none">None</enumerationValue>
+                        <enumerationValue key="fitGridWidth">Fit grid width</enumerationValue>
+                        <enumerationValue key="fitCellContents">Fit cell contents</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="stateStorage" type="enumeration" defaultValue="none">
+                    <caption>Remember layout in</caption>
+                    <description>Where column order, widths, pinning, visibility, sorting, filters and the search text are remembered. Browser storage needs no entity and is kept per browser. Attribute stores it in a String attribute of the page context object, so it can be persisted per user.</description>
+                    <enumerationValues>
+                        <enumerationValue key="none">Nowhere</enumerationValue>
+                        <enumerationValue key="browser">Browser storage</enumerationValue>
+                        <enumerationValue key="attribute">Attribute</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="columnStateAttribute" type="attribute" required="false">
+                    <caption>Layout attribute</caption>
+                    <description>String attribute that remembers the layout when 'Remember layout in' is 'Attribute'. Store it on a persistent object to keep the layout between sessions.</description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Row drag">
+                <property key="rowDrag" type="boolean" defaultValue="false">
+                    <caption>Row drag</caption>
+                    <description>Shows a drag handle in the first column so rows can be reordered. Without pagination rows move while dragging; with pagination the row is dropped on the hovered row. Disable sorting and filtering for a predictable order.</description>
+                </property>
+                <property key="rowDragAttribute" type="attribute" dataSource="datasource" required="false">
+                    <caption>Order attribute</caption>
+                    <description>After a drop the new position (starting at 1) is written to this attribute of every row. Sort the data source on it to keep the order.</description>
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                        <attributeType name="Decimal" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Appearance">
+            <propertyGroup caption="Theme">
+                <property key="theme" type="enumeration" defaultValue="atlas">
+                    <caption>Theme</caption>
+                    <description>Atlas matches the look of Data Grid 2 (app font, white header, thin row lines, Data Grid 2 style paging). The AG Grid themes can be combined with a light or dark color scheme.</description>
+                    <enumerationValues>
+                        <enumerationValue key="atlas">Atlas (Data Grid 2 look)</enumerationValue>
+                        <enumerationValue key="quartz">Quartz</enumerationValue>
+                        <enumerationValue key="alpine">Alpine</enumerationValue>
+                        <enumerationValue key="balham">Balham</enumerationValue>
+                        <enumerationValue key="material">Material</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="colorScheme" type="enumeration" defaultValue="light">
+                    <caption>Color scheme</caption>
+                    <description>Auto follows the browser or operating system preference.</description>
+                    <enumerationValues>
+                        <enumerationValue key="light">Light</enumerationValue>
+                        <enumerationValue key="dark">Dark</enumerationValue>
+                        <enumerationValue key="auto">Auto</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="accentColor" type="string" required="false">
+                    <caption>Accent color</caption>
+                    <description>CSS color used for selection, focus and checkboxes, e.g. #264AE5. Leave empty for the theme default.</description>
+                </property>
+                <property key="fontSize" type="integer" defaultValue="0">
+                    <caption>Font size (px)</caption>
+                    <description>0 uses the theme default.</description>
+                </property>
+                <property key="spacing" type="integer" defaultValue="0">
+                    <caption>Spacing (px)</caption>
+                    <description>Base padding used by the theme. Smaller values give a denser grid. 0 uses the theme default.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Layout">
+                <property key="layout" type="enumeration" defaultValue="fixedHeight">
+                    <caption>Height</caption>
+                    <description>Fixed height scrolls rows inside the grid. Auto height grows with the rows. Print renders every row without scrollbars.</description>
+                    <enumerationValues>
+                        <enumerationValue key="fixedHeight">Fixed height</enumerationValue>
+                        <enumerationValue key="autoHeight">Auto height</enumerationValue>
+                        <enumerationValue key="print">Print</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="height" type="string" defaultValue="500px">
+                    <caption>Grid height</caption>
+                    <description>CSS height for the fixed height layout, e.g. 500px or 70vh.</description>
+                </property>
+                <property key="rowHeight" type="integer" defaultValue="0">
+                    <caption>Row height (px)</caption>
+                    <description>0 uses the theme default.</description>
+                </property>
+                <property key="headerHeight" type="integer" defaultValue="0">
+                    <caption>Header height (px)</caption>
+                    <description>0 uses the theme default.</description>
+                </property>
+                <property key="wrapHeaderText" type="boolean" defaultValue="false">
+                    <caption>Wrap header text</caption>
+                    <description>Wraps long captions and grows the header to fit.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Rows">
+                <property key="showRowNumbers" type="boolean" defaultValue="false">
+                    <caption>Row numbers</caption>
+                    <description>Adds a pinned first column with the row number.</description>
+                </property>
+                <property key="animateRows" type="boolean" defaultValue="true">
+                    <caption>Animate rows</caption>
+                    <description>Animates rows when sorting, filtering or paging.</description>
+                </property>
+                <property key="rowHoverHighlight" type="boolean" defaultValue="true">
+                    <caption>Highlight row on hover</caption>
+                    <description>Highlights the row under the mouse pointer.</description>
+                </property>
+                <property key="columnHoverHighlight" type="boolean" defaultValue="false">
+                    <caption>Highlight column on hover</caption>
+                    <description>Highlights the column under the mouse pointer.</description>
+                </property>
+                <property key="cellTextSelection" type="boolean" defaultValue="false">
+                    <caption>Allow text selection</caption>
+                    <description>Lets the user select and copy cell text with the mouse.</description>
+                </property>
+                <property key="rowClass" type="expression" dataSource="datasource" required="false">
+                    <caption>Row class</caption>
+                    <description>CSS class(es) added to the row, evaluated per row.</description>
+                    <returnType type="String" />
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Totals row">
+                <property key="totalsRow" type="enumeration" defaultValue="none">
+                    <caption>Totals row</caption>
+                    <description>Shows a pinned row with the values configured per column under 'Totals row value'.</description>
+                    <enumerationValues>
+                        <enumerationValue key="none">None</enumerationValue>
+                        <enumerationValue key="bottom">Pinned at the bottom</enumerationValue>
+                        <enumerationValue key="top">Pinned at the top</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="totalsLabel" type="textTemplate" required="false">
+                    <caption>Totals label</caption>
+                    <description>Shown in the first column of the totals row when that column has no value of its own.</description>
+                    <translations>
+                        <translation lang="en_US">Total</translation>
+                    </translations>
+                </property>
+                <property key="totalsSource" type="enumeration" defaultValue="loaded">
+                    <caption>Totals from</caption>
+                    <description>Loaded rows calculates the per-column 'Totals row value' over the rows in the browser (the filtered rows, or the loaded page with server data loading). Data source shows attributes of the first object of the totals data source, so a microflow can aggregate over all rows on the server.</description>
+                    <enumerationValues>
+                        <enumerationValue key="loaded">Loaded rows</enumerationValue>
+                        <enumerationValue key="datasource">Data source</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="totalsDatasource" type="datasource" isList="true" required="false">
+                    <caption>Totals data source</caption>
+                    <description>Data source (typically a microflow returning one non-persistable object) whose first object holds the totals; map its attributes per column with 'Total from data source'.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Labels">
+                <property key="labelColumns" type="textTemplate" required="false">
+                    <caption>Columns button label</caption>
+                    <description>Text of the Columns button.</description>
+                    <translations>
+                        <translation lang="en_US">Columns</translation>
+                    </translations>
+                </property>
+                <property key="labelRefresh" type="textTemplate" required="false">
+                    <caption>Refresh button label</caption>
+                    <description>Text of the Refresh button.</description>
+                    <translations>
+                        <translation lang="en_US">Refresh</translation>
+                    </translations>
+                </property>
+                <property key="labelReset" type="textTemplate" required="false">
+                    <caption>Reset button label</caption>
+                    <description>Text of the Reset button.</description>
+                    <translations>
+                        <translation lang="en_US">Reset</translation>
+                    </translations>
+                </property>
+                <property key="labelExportExcel" type="textTemplate" required="false">
+                    <caption>Excel button label</caption>
+                    <description>Text of the Export Excel button.</description>
+                    <translations>
+                        <translation lang="en_US">Export Excel</translation>
+                    </translations>
+                </property>
+                <property key="labelExportCsv" type="textTemplate" required="false">
+                    <caption>CSV button label</caption>
+                    <description>Text of the Export CSV button.</description>
+                    <translations>
+                        <translation lang="en_US">Export CSV</translation>
+                    </translations>
+                </property>
+                <property key="labelSelected" type="textTemplate" required="false">
+                    <caption>Selection count text</caption>
+                    <description>Text next to the selection; [count] is replaced by the number of selected rows.</description>
+                    <translations>
+                        <translation lang="en_US">[count] selected</translation>
+                    </translations>
+                </property>
+                <property key="labelClearSelection" type="textTemplate" required="false">
+                    <caption>Clear selection label</caption>
+                    <description>Text of the button that clears the selection.</description>
+                    <translations>
+                        <translation lang="en_US">Clear</translation>
+                    </translations>
+                </property>
+                <property key="labelPageSize" type="textTemplate" required="false">
+                    <caption>Page size label</caption>
+                    <description>Label of the page size selector in the Atlas pager.</description>
+                    <translations>
+                        <translation lang="en_US">Page size</translation>
+                    </translations>
+                </property>
+                <property key="labelPagingStatus" type="textTemplate" required="false">
+                    <caption>Paging status text</caption>
+                    <description>Text in the Atlas pager; [first], [last] and [total] are replaced by the row numbers.</description>
+                    <translations>
+                        <translation lang="en_US">[first] to [last] of [total]</translation>
+                    </translations>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Messages">
+                <property key="noRowsText" type="textTemplate" required="false">
+                    <caption>No rows text</caption>
+                    <description>Message shown when the data source returns no objects or every row is filtered out.</description>
+                    <translations>
+                        <translation lang="en_US">No rows to show</translation>
+                    </translations>
+                </property>
+                <property key="emptyPlaceholder" type="widgets" required="false">
+                    <caption>Empty placeholder</caption>
+                    <description>Widgets shown instead of the grid body when the data source returns no objects.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Events">
+            <propertyGroup caption="Events">
+                <property key="onRowClick" type="action" dataSource="datasource" required="false">
+                    <caption>On row click</caption>
+                    <description>Runs when a row is clicked. A column 'On click' action takes precedence for its cells.</description>
+                </property>
+                <property key="onRowDoubleClick" type="action" dataSource="datasource" required="false">
+                    <caption>On row double click</caption>
+                    <description>Runs when a row is double clicked.</description>
+                </property>
+                <property key="onSelectionChange" type="action" required="false">
+                    <caption>On selection change</caption>
+                    <description>Runs after the selection changed.</description>
+                </property>
+                <property key="onCellValueChange" type="action" dataSource="datasource" required="false">
+                    <caption>On cell value change</caption>
+                    <description>Runs after any edited value is written to its attribute. Column 'On change' actions run first. The variables New value and Old value hold the values as text.</description>
+                    <actionVariables>
+                        <actionVariable key="newValue" type="String" caption="New value" />
+                        <actionVariable key="oldValue" type="String" caption="Old value" />
+                    </actionVariables>
+                </property>
+                <property key="onRowDragEnd" type="action" required="false">
+                    <caption>On row drag end</caption>
+                    <description>Runs after rows were reordered by dragging. The order attribute is already updated when this runs.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+    </properties>
+</widget>
