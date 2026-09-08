@@ -13,7 +13,7 @@ A Mendix pluggable widget that wraps [ag-grid-react](https://www.npmjs.com/packa
 ## Installation
 
 Download `com.mxtechies.widget.web.AGGrid.mpk` from the
-[latest release](https://github.com/bharathidas/MxTechiesAGGrid/releases) (or the Mendix Marketplace)
+[latest release](https://github.com/bharathidas/AGGrid/releases) (or the Mendix Marketplace)
 and drop it into the `widgets` folder of your app, then press F4 in Studio Pro.
 
 ## Usage
