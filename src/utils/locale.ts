@@ -43,3 +43,13 @@ export function localeTextFor(locale: string): Record<string, string> | undefine
     const [language, region] = locale.toLowerCase().split(/[_-]/);
     return LOCALES[`${language}-${region}`] ?? LOCALES[language];
 }
+
+/** The session language as a BCP 47 tag for Intl ("nl_NL" becomes "nl-NL"); undefined when Intl rejects it. */
+export function intlLocale(): string | undefined {
+    const tag = sessionLocale().replace(/_/g, "-");
+    try {
+        return Intl.getCanonicalLocales(tag)[0];
+    } catch {
+        return undefined;
+    }
+}

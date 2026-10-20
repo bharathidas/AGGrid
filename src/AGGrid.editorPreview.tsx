@@ -4,7 +4,16 @@ import { Selectable } from "mendix/preview/Selectable";
 import { ColumnsPreviewType, AGGridPreviewProps } from "../typings/AGGridProps";
 import { pagingStatus, totalsCaption } from "./AGGrid.editorConfig";
 import { headerGroups } from "./utils/headerGroups";
-import { ColumnsIcon, CsvIcon, ExcelIcon, RefreshIcon, ResetIcon } from "./components/Icons";
+import {
+    ColumnsIcon,
+    GroupIcon,
+    CsvIcon,
+    ExcelIcon,
+    KeyboardIcon,
+    RefreshIcon,
+    ResetIcon,
+    ViewsIcon
+} from "./components/Icons";
 
 /**
  * Design-time preview that reuses the Data Grid 2 markup and class names (widget-datagrid, th, td,
@@ -147,7 +156,10 @@ export function preview(props: AGGridPreviewProps): ReactElement {
         props.showExportButton ||
         props.showResetButton ||
         props.showRefreshButton ||
-        props.showColumnChooser;
+        props.showColumnChooser ||
+        props.showViews ||
+        props.enableGrouping ||
+        props.showKeyboardHelp;
     const widths: string[] = [];
     if (hasSelection) {
         widths.push("48px");
@@ -159,6 +171,7 @@ export function preview(props: AGGridPreviewProps): ReactElement {
     const gridStyle = { "--widgets-grid-template-columns": widths.join(" ") } as CSSProperties;
     const spanAll = columns.length + (hasSelection ? 1 : 0) + (props.showRowNumbers ? 1 : 0);
     const EmptyPlaceholder = props.emptyPlaceholder.renderer;
+    const DetailContent = props.detailContent.renderer;
     const groups = headerGroups(columns);
 
     const headerCell = (column: ColumnsPreviewType, index: number): ReactElement => {
@@ -196,6 +209,18 @@ export function preview(props: AGGridPreviewProps): ReactElement {
                         />
                     )}
                     <div className="mxt-ag-preview-buttons">
+                        {props.showViews && (
+                            <button className="btn btn-default mxt-ag-btn">
+                                <ViewsIcon />
+                                <span>{props.labelViews || "Views"}</span>
+                            </button>
+                        )}
+                        {props.enableGrouping && props.dataMode !== "server" && (
+                            <button className="btn btn-default mxt-ag-btn">
+                                <GroupIcon />
+                                <span>{props.labelGroupBy || "Group by"}</span>
+                            </button>
+                        )}
                         {props.showColumnChooser && (
                             <button className="btn btn-default mxt-ag-btn">
                                 <ColumnsIcon />
@@ -224,6 +249,11 @@ export function preview(props: AGGridPreviewProps): ReactElement {
                             <button className="btn btn-default mxt-ag-btn">
                                 <CsvIcon />
                                 <span>{props.labelExportCsv || "Export CSV"}</span>
+                            </button>
+                        )}
+                        {props.showKeyboardHelp && (
+                            <button className="btn btn-default mxt-ag-btn" aria-label="Keyboard shortcuts">
+                                <KeyboardIcon />
                             </button>
                         )}
                     </div>
@@ -317,6 +347,9 @@ export function preview(props: AGGridPreviewProps): ReactElement {
                                 )}
                             </div>
                         ))}
+                        <DetailContent caption="Detail row (optional): widgets shown when a row is expanded">
+                            <div className="td" style={{ gridColumn: `span ${Math.max(1, spanAll)}` }} />
+                        </DetailContent>
                         {props.totalsRow !== "none" && (
                             <div className="tr tr-totals">
                                 {hasSelection && <div className="td widget-datagrid-col-select" />}

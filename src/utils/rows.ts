@@ -2,6 +2,9 @@ import { Big } from "big.js";
 import { ListAttributeValue, ObjectItem } from "mendix";
 
 import { ColumnsType } from "../../typings/AGGridProps";
+import type { GroupInfo } from "./grouping";
+import type { TreeInfo } from "./tree";
+import type { CommitHandle, CommitMonitor } from "./commitTracker";
 
 export type AttributeValue = string | Big | boolean | Date;
 export type ListAttribute = ListAttributeValue<AttributeValue>;
@@ -15,7 +18,11 @@ export interface CellData {
     /** Formatted value produced by Mendix, used for display and text filtering. */
     display: string;
     validation?: string;
+    /** Message of the column Validation expression; empty or undefined when the value is valid. */
+    error?: string;
     readOnly: boolean;
+    /** Aggregation that produced the value (totals, group, tree and pivot cells). */
+    aggregate?: string;
 }
 
 export interface GridRow {
@@ -24,6 +31,20 @@ export interface GridRow {
     cells: Record<string, CellData>;
     /** Set on the totals row so renderers can tell it apart from data rows. */
     totals?: boolean;
+    /** Set on the full-width detail row shown under an expanded row. */
+    detail?: boolean;
+    /** Id of the row a detail row belongs to. */
+    parentId?: string;
+    /** Set on group header rows (row grouping). */
+    group?: GroupInfo;
+    /** Set on rows shown as a hierarchy (tree data). */
+    tree?: TreeInfo;
+    /** Aggregates of the descendants shown instead of the own values (tree parents, generated path rows). */
+    aggCells?: Record<string, CellData>;
+    /** Row of a lazily loaded server group: read-only snapshot of the values. */
+    snapshot?: boolean;
+    /** "Load more" placeholder row at the end of a lazily loaded server group. */
+    loadMore?: { groupPath: string; loaded: number; total: number };
 }
 
 export const TOTALS_ROW_ID = "__mxt_totals__";
@@ -269,6 +290,8 @@ export interface WriteOptions {
     attributeName?: string;
     /** Called once the value has been written (and committed when requested). */
     onWritten?: (attributeName: string) => void;
+    /** Tracks the save: slow and failed saves are shown to the user with Retry and Discard. */
+    monitor?: CommitMonitor;
 }
 
 export function writeValue(
@@ -285,7 +308,16 @@ export function writeValue(
     if (!editable.readOnly) {
         editable.setValue(value);
         if (options.commit && data) {
-            commitItem(data, item, () => options.onWritten?.(override ?? ""));
+            const handle = options.monitor?.start();
+            commitItem(
+                data,
+                item,
+                () => {
+                    handle?.done();
+                    options.onWritten?.(override ?? "");
+                },
+                handle
+            );
         } else {
             options.onWritten?.(override ?? "");
         }
@@ -294,65 +326,131 @@ export function writeValue(
     if (!data) {
         return false;
     }
-    const resolved = override
-        ? Promise.resolve(override)
-        : resolveAttributeName(data, attribute, kind, items.length > 0 ? items : [item]);
-    resolved
-        .then(name => {
-            if (!name) {
-                return;
-            }
-            return getObjects(data, [item.id]).then(([object]) => {
-                if (!object) {
-                    return;
+    const handle = options.monitor?.start();
+    const run = (): void => {
+        const resolved = override
+            ? Promise.resolve(override)
+            : resolveAttributeName(data, attribute, kind, items.length > 0 ? items : [item]);
+        resolved
+            .then(name => {
+                if (!name) {
+                    throw new Error(
+                        "cannot tell which attribute to write; set 'Attribute name (editing)' on the column"
+                    );
                 }
-                object.set(name, toClientValue(kind, value));
-                if (options.commit) {
-                    commitObject(data, object, () => options.onWritten?.(name));
+                return getObjects(data, [item.id]).then(([object]) => {
+                    if (!object) {
+                        throw new Error("the object is no longer available");
+                    }
+                    object.set(name, toClientValue(kind, value));
+                    if (options.commit) {
+                        commitObject(
+                            data,
+                            object,
+                            () => {
+                                handle?.done();
+                                options.onWritten?.(name);
+                            },
+                            handle
+                        );
+                    } else {
+                        handle?.done();
+                        options.onWritten?.(name);
+                    }
+                });
+            })
+            .catch(error => {
+                if (handle) {
+                    console.error("AGGrid: could not write the value", error);
+                    handle.failed(error, run);
                 } else {
-                    options.onWritten?.(name);
+                    reportError("could not write the value", error);
                 }
             });
-        })
-        .catch(error => reportError("could not write the value", error));
+    };
+    run();
     return true;
 }
 
-function commitObject(data: MxClientData, object: MxClientObject, done?: () => void): void {
+function commitObject(data: MxClientData, object: MxClientObject, done?: () => void, handle?: CommitHandle): void {
     if (!data.commit) {
         done?.();
         return;
     }
-    data.commit({
-        mxobj: object,
-        callback: () => done?.(),
-        error: error => reportError("could not save the object", error)
-    });
+    const attempt = (): void =>
+        data.commit?.({
+            mxobj: object,
+            callback: () => done?.(),
+            error: error => {
+                if (handle) {
+                    console.error("AGGrid: could not save the object", error);
+                    handle.failed(error, attempt);
+                } else {
+                    reportError("could not save the object", error);
+                }
+            }
+        });
+    attempt();
 }
 
-function commitItem(data: MxClientData, item: ObjectItem, done?: () => void): void {
-    getObjects(data, [item.id])
-        .then(([object]) => (object ? commitObject(data, object, done) : done?.()))
-        .catch(error => reportError("could not save the object", error));
+/** Commits an object through the Mendix client API (used for commits that were held while the object was invalid). */
+export function commitItemNow(item: ObjectItem, done?: () => void): boolean {
+    const data = clientData();
+    if (!data) {
+        return false;
+    }
+    commitItem(data, item, done);
+    return true;
+}
+
+function commitItem(data: MxClientData, item: ObjectItem, done?: () => void, handle?: CommitHandle): void {
+    const attempt = (): void => {
+        getObjects(data, [item.id])
+            .then(([object]) => (object ? commitObject(data, object, done, handle) : done?.()))
+            .catch(error => {
+                if (handle) {
+                    console.error("AGGrid: could not save the object", error);
+                    handle.failed(error, attempt);
+                } else {
+                    reportError("could not save the object", error);
+                }
+            });
+    };
+    attempt();
+}
+
+/** Message of a column Validation expression for an item; undefined when the value is valid. */
+export function validationMessage(column: ColumnsType, item: ObjectItem): string | undefined {
+    if (!column.validation) {
+        return undefined;
+    }
+    try {
+        const message = column.validation.get(item).value;
+        return message && message.trim() ? message.trim() : undefined;
+    } catch {
+        return undefined;
+    }
 }
 
 export function buildRow(item: ObjectItem, columns: ColumnsType[]): GridRow {
     const cells: Record<string, CellData> = {};
     columns.forEach((column, index) => {
         const id = columnId(index);
+        const error = validationMessage(column, item);
         if (column.columnType === "attribute" && column.attribute) {
             const editable = column.attribute.get(item);
             cells[id] = {
                 value: toGridValue(editable.value),
                 display: editable.displayValue,
                 validation: editable.validation,
+                error,
                 readOnly: editable.readOnly
             };
         } else if (column.columnType === "dynamicText") {
             const text = column.dynamicText?.get(item).value ?? "";
-            cells[id] = { value: text, display: text, readOnly: true };
+            cells[id] = { value: text, display: text, error, readOnly: true };
         } else {
-            cells[id] = { value: undefined, display: "", readOnly: true };
+            cells[id] = { value: undefined, display: "", error, readOnly: true };
         }
     });
     return { id: item.id, item, cells };

@@ -67,6 +67,28 @@ export interface ThemeOptions {
     accentColor: string;
     fontSize: number;
     spacing: number;
+    /** Row density chosen with the toolbar density button; undefined keeps the configured spacing. */
+    density?: Density;
+}
+
+export type Density = "compact" | "normal" | "comfortable";
+export const DENSITIES: Density[] = ["compact", "normal", "comfortable"];
+
+/** Row height factor and spacing of every density. */
+const DENSITY_SCALE: Record<Density, number> = { compact: 0.75, normal: 1, comfortable: 1.25 };
+
+export function nextDensity(current: Density | undefined): Density {
+    const index = DENSITIES.indexOf(current ?? "normal");
+    return DENSITIES[(index + 1) % DENSITIES.length];
+}
+
+export function isDensity(value: unknown): value is Density {
+    return value === "compact" || value === "normal" || value === "comfortable";
+}
+
+/** Row height for a density when the page sets a fixed Row height (0 keeps the theme height). */
+export function densityRowHeight(rowHeight: number, density: Density | undefined): number {
+    return rowHeight > 0 && density ? Math.round(rowHeight * DENSITY_SCALE[density]) : rowHeight;
 }
 
 /** Builds an AG Grid Theming API theme from the widget settings. */
@@ -89,6 +111,14 @@ export function buildTheme(options: ThemeOptions): Theme {
     }
     if (options.spacing > 0) {
         params.spacing = options.spacing;
+    }
+    if (options.density && options.density !== "normal") {
+        const scale = DENSITY_SCALE[options.density];
+        const baseSpacing = typeof params.spacing === "number" ? params.spacing : 8;
+        params.spacing = Math.max(2, Math.round(baseSpacing * scale));
+        if (typeof params.rowHeight === "number") {
+            params.rowHeight = Math.round(params.rowHeight * scale);
+        }
     }
     if (Object.keys(params).length > 0) {
         theme = theme.withParams(params);

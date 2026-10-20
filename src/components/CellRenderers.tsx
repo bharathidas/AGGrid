@@ -2,6 +2,7 @@ import { ReactElement } from "react";
 import { ICellRendererParams } from "ag-grid-community";
 
 import { GridRow } from "../utils/rows";
+import { parseSeries, sparkline } from "../utils/sparkline";
 
 function text(params: ICellRendererParams<GridRow>): string {
     return params.valueFormatted ?? (params.value === undefined || params.value === null ? "" : String(params.value));
@@ -54,4 +55,31 @@ export function ProgressCellRenderer(params: ICellRendererParams<GridRow>): Reac
 export function ImageCellRenderer(params: ICellRendererParams<GridRow>): ReactElement | null {
     const value = text(params);
     return value ? <img className="mxt-ag-cell-image" src={value} alt="" /> : null;
+}
+
+const SPARK_WIDTH = 100;
+const SPARK_HEIGHT = 24;
+
+/** Small trend line from a text value with numbers ("3,5,4,8,7"); the last point is marked. */
+export function SparklineCellRenderer(params: ICellRendererParams<GridRow>): ReactElement | null {
+    const values = parseSeries(params.data?.cells[params.column?.getColId() ?? ""]?.display ?? params.value);
+    const geometry = sparkline(values, SPARK_WIDTH, SPARK_HEIGHT);
+    if (!geometry) {
+        return null;
+    }
+    const label = `Trend ${geometry.trend}: from ${geometry.first} to ${geometry.lastValue}, low ${geometry.min}, high ${geometry.max}`;
+    return (
+        <svg
+            className={`mxt-ag-spark mxt-ag-spark--${geometry.trend}`}
+            viewBox={`0 0 ${SPARK_WIDTH} ${SPARK_HEIGHT}`}
+            preserveAspectRatio="none"
+            role="img"
+            aria-label={label}
+        >
+            <title>{label}</title>
+            <polygon className="mxt-ag-spark__area" points={geometry.area} />
+            <polyline className="mxt-ag-spark__line" points={geometry.points} vectorEffect="non-scaling-stroke" />
+            <circle className="mxt-ag-spark__dot" cx={geometry.last.x} cy={geometry.last.y} r="2.2" />
+        </svg>
+    );
 }

@@ -23,17 +23,25 @@ export type DataModeEnum = "client" | "server";
 
 export type ColumnTypeEnum = "attribute" | "dynamicText" | "customContent";
 
-export type RenderAsEnum = "text" | "link" | "badge" | "progress" | "image";
+export type RenderAsEnum = "text" | "link" | "badge" | "progress" | "image" | "sparkline";
 
 export type WidthModeEnum = "flex" | "fixed" | "auto";
 
-export type FilterTypeEnum = "auto" | "text" | "number" | "date" | "none";
+export type FilterTypeEnum = "auto" | "text" | "number" | "date" | "set" | "none";
 
 export type PinnedEnum = "none" | "left" | "right";
 
-export type AggregateEnum = "none" | "sum" | "avg" | "min" | "max" | "count";
+export type AggregateEnum = "none" | "sum" | "avg" | "min" | "max" | "count" | "distinctCount";
+
+export type AggregateTopEnum = "same" | "none" | "sum" | "avg" | "min" | "max" | "count" | "distinctCount";
+
+export type PivotRoleEnum = "none" | "row" | "column" | "value";
+
+export type PivotAggregateEnum = "sum" | "avg" | "count" | "min" | "max" | "distinctCount";
 
 export type AlignmentEnum = "auto" | "left" | "center" | "right";
+
+export type ConditionalFormatEnum = "none" | "dataBar" | "colorScale" | "iconSet";
 
 export interface ColumnsType {
     columnType: ColumnTypeEnum;
@@ -59,17 +67,29 @@ export interface ColumnsType {
     resizable: boolean;
     movable: boolean;
     aggregate: AggregateEnum;
+    aggregateTop: AggregateTopEnum;
+    pivotRole: PivotRoleEnum;
+    pivotAggregate: PivotAggregateEnum;
+    pivotable: boolean;
+    groupIndex: number;
+    groupable: boolean;
+    validation?: ListExpressionValue<string>;
     alignment: AlignmentEnum;
     decimalPrecision: number;
     groupDigits: boolean;
     wrapText: boolean;
     autoHeight: boolean;
+    conditionalFormat: ConditionalFormatEnum;
+    formatColor: string;
+    formatReverse: boolean;
     cellClass?: ListExpressionValue<string>;
     onClick?: ListActionValue;
     onChange?: ListActionValue<{ newValue: Option<string>; oldValue: Option<string> }>;
 }
 
 export type ExportFormatEnum = "excel" | "csv" | "both";
+
+export type ExportSheetsEnum = "auto" | "data";
 
 export type EditTypeEnum = "cell" | "fullRow";
 
@@ -79,13 +99,19 @@ export type AutoSizeStrategyEnum = "none" | "fitGridWidth" | "fitCellContents";
 
 export type StateStorageEnum = "none" | "browser" | "attribute";
 
+export type TreeModeEnum = "none" | "parentKey" | "path";
+
+export type DetailExpandModeEnum = "single" | "multiple";
+
 export type ThemeEnum = "atlas" | "quartz" | "alpine" | "balham" | "material";
 
 export type ColorSchemeEnum = "light" | "dark" | "auto";
 
 export type LayoutEnum = "fixedHeight" | "autoHeight" | "print";
 
-export type TotalsRowEnum = "none" | "bottom" | "top";
+export type MotionEnum = "full" | "subtle" | "off";
+
+export type TotalsRowEnum = "none" | "bottom" | "top" | "both";
 
 export type TotalsSourceEnum = "loaded" | "datasource";
 
@@ -113,11 +139,21 @@ export interface ColumnsPreviewType {
     resizable: boolean;
     movable: boolean;
     aggregate: AggregateEnum;
+    aggregateTop: AggregateTopEnum;
+    pivotRole: PivotRoleEnum;
+    pivotAggregate: PivotAggregateEnum;
+    pivotable: boolean;
+    groupIndex: number | null;
+    groupable: boolean;
+    validation: string;
     alignment: AlignmentEnum;
     decimalPrecision: number | null;
     groupDigits: boolean;
     wrapText: boolean;
     autoHeight: boolean;
+    conditionalFormat: ConditionalFormatEnum;
+    formatColor: string;
+    formatReverse: boolean;
     cellClass: string;
     onClick: {} | null;
     onChange: {} | null;
@@ -142,11 +178,15 @@ export interface AGGridContainerProps {
     quickFilterAttribute?: EditableValue<string>;
     showExportButton: boolean;
     exportFormat: ExportFormatEnum;
+    exportSheets: ExportSheetsEnum;
+    exportStyled: boolean;
     exportFileName: string;
     showResetButton: boolean;
     showRefreshButton: boolean;
     showColumnChooser: boolean;
     showSelectionCount: boolean;
+    showDensityToggle: boolean;
+    showKeyboardHelp: boolean;
     alwaysMultiSort: boolean;
     floatingFilters: boolean;
     pagination: boolean;
@@ -160,9 +200,39 @@ export interface AGGridContainerProps {
     undoRedo: boolean;
     enterNavigatesVertically: boolean;
     flashOnChange: boolean;
+    clipboardPaste: boolean;
+    blockInvalidCommit: boolean;
     autoSizeStrategy: AutoSizeStrategyEnum;
     stateStorage: StateStorageEnum;
     columnStateAttribute?: EditableValue<string>;
+    enableGrouping: boolean;
+    groupsExpanded: boolean;
+    serverGrouping: boolean;
+    hideGroupedColumns: boolean;
+    showStatusBar: boolean;
+    enablePivot: boolean;
+    pivotStartActive: boolean;
+    pivotTotals: boolean;
+    treeMode: TreeModeEnum;
+    treeKey?: ListExpressionValue<string>;
+    treeParentKey?: ListExpressionValue<string>;
+    treePath?: ListExpressionValue<string>;
+    treePathSeparator: string;
+    treeLabel?: ListExpressionValue<string>;
+    treeExpandDepth: number;
+    treeAggregates: boolean;
+    rangeSelection: boolean;
+    fillHandle: boolean;
+    rangeChart: boolean;
+    showSidePanel: boolean;
+    sidePanelStartOpen: boolean;
+    showViews: boolean;
+    viewsAttribute?: EditableValue<string>;
+    viewsKey: string;
+    detailContent?: ListWidgetValue;
+    detailExpandMode: DetailExpandModeEnum;
+    detailStartCollapsed: boolean;
+    detailHeight: number;
     rowDrag: boolean;
     rowDragAttribute?: ListAttributeValue<Big>;
     theme: ThemeEnum;
@@ -177,11 +247,15 @@ export interface AGGridContainerProps {
     wrapHeaderText: boolean;
     showRowNumbers: boolean;
     animateRows: boolean;
+    animate: boolean;
+    motion: MotionEnum;
+    highlightSearch: boolean;
     rowHoverHighlight: boolean;
     columnHoverHighlight: boolean;
     cellTextSelection: boolean;
     rowClass?: ListExpressionValue<string>;
     totalsRow: TotalsRowEnum;
+    totalsUserChange: boolean;
     totalsLabel?: DynamicValue<string>;
     totalsSource: TotalsSourceEnum;
     totalsDatasource?: ListValue;
@@ -194,11 +268,33 @@ export interface AGGridContainerProps {
     labelClearSelection?: DynamicValue<string>;
     labelPageSize?: DynamicValue<string>;
     labelPagingStatus?: DynamicValue<string>;
+    labelViews?: DynamicValue<string>;
+    labelSaveView?: DynamicValue<string>;
+    labelIssues?: DynamicValue<string>;
+    labelShowDetails?: DynamicValue<string>;
+    labelClearFilters?: DynamicValue<string>;
+    labelGroupBy?: DynamicValue<string>;
+    labelGroupColumn?: DynamicValue<string>;
+    labelDensity?: DynamicValue<string>;
+    labelStatusRows?: DynamicValue<string>;
+    labelSidePanel?: DynamicValue<string>;
+    labelPivot?: DynamicValue<string>;
+    labelPivotTotal?: DynamicValue<string>;
+    labelTreeColumn?: DynamicValue<string>;
+    labelChartRange?: DynamicValue<string>;
+    labelSaveFailed?: DynamicValue<string>;
+    labelRetry?: DynamicValue<string>;
+    labelDiscard?: DynamicValue<string>;
+    labelError?: DynamicValue<string>;
+    labelKeyboardHelp?: DynamicValue<string>;
     noRowsText?: DynamicValue<string>;
     emptyPlaceholder?: ReactNode;
     onRowClick?: ListActionValue;
     onRowDoubleClick?: ListActionValue;
     onCellValueChange?: ListActionValue<{ newValue: Option<string>; oldValue: Option<string> }>;
+    onGroupByChange?: ActionValue<{ groupBy: Option<string> }>;
+    onPaste?: ActionValue<{ cellCount: Option<Big> }>;
+    onFill?: ActionValue<{ cellCount: Option<Big> }>;
     onRowDragEnd?: ActionValue;
 }
 
@@ -227,11 +323,15 @@ export interface AGGridPreviewProps {
     quickFilterAttribute: string;
     showExportButton: boolean;
     exportFormat: ExportFormatEnum;
+    exportSheets: ExportSheetsEnum;
+    exportStyled: boolean;
     exportFileName: string;
     showResetButton: boolean;
     showRefreshButton: boolean;
     showColumnChooser: boolean;
     showSelectionCount: boolean;
+    showDensityToggle: boolean;
+    showKeyboardHelp: boolean;
     alwaysMultiSort: boolean;
     floatingFilters: boolean;
     pagination: boolean;
@@ -245,9 +345,39 @@ export interface AGGridPreviewProps {
     undoRedo: boolean;
     enterNavigatesVertically: boolean;
     flashOnChange: boolean;
+    clipboardPaste: boolean;
+    blockInvalidCommit: boolean;
     autoSizeStrategy: AutoSizeStrategyEnum;
     stateStorage: StateStorageEnum;
     columnStateAttribute: string;
+    enableGrouping: boolean;
+    groupsExpanded: boolean;
+    serverGrouping: boolean;
+    hideGroupedColumns: boolean;
+    showStatusBar: boolean;
+    enablePivot: boolean;
+    pivotStartActive: boolean;
+    pivotTotals: boolean;
+    treeMode: TreeModeEnum;
+    treeKey: string;
+    treeParentKey: string;
+    treePath: string;
+    treePathSeparator: string;
+    treeLabel: string;
+    treeExpandDepth: number | null;
+    treeAggregates: boolean;
+    rangeSelection: boolean;
+    fillHandle: boolean;
+    rangeChart: boolean;
+    showSidePanel: boolean;
+    sidePanelStartOpen: boolean;
+    showViews: boolean;
+    viewsAttribute: string;
+    viewsKey: string;
+    detailContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
+    detailExpandMode: DetailExpandModeEnum;
+    detailStartCollapsed: boolean;
+    detailHeight: number | null;
     rowDrag: boolean;
     rowDragAttribute: string;
     theme: ThemeEnum;
@@ -262,11 +392,15 @@ export interface AGGridPreviewProps {
     wrapHeaderText: boolean;
     showRowNumbers: boolean;
     animateRows: boolean;
+    animate: boolean;
+    motion: MotionEnum;
+    highlightSearch: boolean;
     rowHoverHighlight: boolean;
     columnHoverHighlight: boolean;
     cellTextSelection: boolean;
     rowClass: string;
     totalsRow: TotalsRowEnum;
+    totalsUserChange: boolean;
     totalsLabel: string;
     totalsSource: TotalsSourceEnum;
     totalsDatasource: {} | { caption: string } | { type: string } | null;
@@ -279,11 +413,33 @@ export interface AGGridPreviewProps {
     labelClearSelection: string;
     labelPageSize: string;
     labelPagingStatus: string;
+    labelViews: string;
+    labelSaveView: string;
+    labelIssues: string;
+    labelShowDetails: string;
+    labelClearFilters: string;
+    labelGroupBy: string;
+    labelGroupColumn: string;
+    labelDensity: string;
+    labelStatusRows: string;
+    labelSidePanel: string;
+    labelPivot: string;
+    labelPivotTotal: string;
+    labelTreeColumn: string;
+    labelChartRange: string;
+    labelSaveFailed: string;
+    labelRetry: string;
+    labelDiscard: string;
+    labelError: string;
+    labelKeyboardHelp: string;
     noRowsText: string;
     emptyPlaceholder: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     onRowClick: {} | null;
     onRowDoubleClick: {} | null;
     onSelectionChange: {} | null;
     onCellValueChange: {} | null;
+    onGroupByChange: {} | null;
+    onPaste: {} | null;
+    onFill: {} | null;
     onRowDragEnd: {} | null;
 }

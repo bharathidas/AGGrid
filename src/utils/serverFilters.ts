@@ -44,6 +44,8 @@ export type SortOrder = Array<[AttributeId, SortDirection]>;
 
 interface SimpleFilterModel {
     filterType?: string;
+    /** Set filter: the selected displayed values ("" = blanks). */
+    values?: string[];
     type?: string;
     filter?: unknown;
     filterTo?: unknown;
@@ -228,10 +230,37 @@ function dateCondition(
     }
 }
 
+/** Set filter on the server: the selected captions of an enumeration or boolean, and (Blanks). */
+function setCondition(
+    attr: ListAttributeValue<AttributeValue>,
+    kind: CellKind,
+    values: string[]
+): FilterCondition | undefined {
+    const field = attribute(attr.id);
+    const parts: FilterCondition[] = [];
+    if (values.includes("")) {
+        parts.push(equals(field, empty()));
+    }
+    if (kind === "enum" || kind === "boolean") {
+        captionValues(attr, kind)
+            .filter(([caption]) => values.includes(caption))
+            .forEach(([, value]) => parts.push(equals(field, literal(value))));
+    } else if (kind === "text") {
+        values.filter(value => value !== "").forEach(value => parts.push(equals(field, literal(value))));
+    } else {
+        // Number and date captions are formatted texts; the server cannot match them reliably.
+        return undefined;
+    }
+    return parts.length === 0 ? nothing(attr) : anyOf(parts);
+}
+
 function columnCondition(column: ColumnsType, model: SimpleFilterModel): FilterCondition | undefined {
     const attr = column.attribute;
     if (!attr || column.columnType !== "attribute" || !attr.filterable) {
         return undefined;
+    }
+    if (model.filterType === "set" && Array.isArray(model.values)) {
+        return setCondition(attr, cellKind(column), model.values);
     }
     const conditions =
         model.conditions ?? [model.condition1, model.condition2].filter((c): c is SimpleFilterModel => !!c);
@@ -304,4 +333,15 @@ export function buildFilter(
     }
 
     return parts.length === 0 ? undefined : allOf(parts);
+}
+
+/** The filter of one lazily loaded server group: the grid filters plus "attribute = value" (or empty). */
+export function groupFilter(
+    base: FilterCondition | undefined,
+    attr: ListAttributeValue<AttributeValue>,
+    value: string | boolean | undefined
+): FilterCondition {
+    const field = attribute(attr.id);
+    const condition = value === undefined ? equals(field, empty()) : equals(field, literal(value));
+    return base ? and(base, condition) : condition;
 }

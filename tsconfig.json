@@ -3,8 +3,15 @@
     "compilerOptions": {
         "baseUrl": "./",
         "outDir": "./dist/tmp",
-        "rootDir": "./"
+        "rootDir": "./",
+        "importHelpers": false
     },
-    "include": ["./src", "./typings"],
-    "exclude": ["./src/__tests__", "./src/__mocks__"]
+    "include": [
+        "./src",
+        "./typings"
+    ],
+    "exclude": [
+        "./src/__tests__",
+        "./src/__mocks__"
+    ]
 }

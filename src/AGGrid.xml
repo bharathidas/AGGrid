@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <widget id="com.mxtechies.widget.web.aggrid.AGGrid" pluginWidget="true" offlineCapable="true" supportedPlatform="Web" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
     <name>AGGrid</name>
-    <description>Data grid powered by AG Grid Community: sorting, filtering, quick search, pagination, inline editing, selection, pinning, reordering, row drag, CSV export, totals and themes.</description>
+    <description>Data grid powered by AG Grid Community: sorting, filtering, set filters, quick search, pagination, inline editing, selection, cell ranges with fill handle and charts, row grouping, pivot mode, tree data, side panel, Excel and CSV export, totals and themes.</description>
     <studioProCategory>Data containers</studioProCategory>
     <studioCategory>Data containers</studioCategory>
     <properties>
@@ -83,13 +83,14 @@
                                 </property>
                                 <property key="renderAs" type="enumeration" defaultValue="text">
                                     <caption>Render as</caption>
-                                    <description>Text shows the formatted value. Link opens the value as a URL in a new tab. Badge shows the value as an Atlas badge (add a cell class such as 'badge-success' to color it). Progress shows a numeric value between 0 and 100 as a bar. Image shows the value as an image URL.</description>
+                                    <description>Text shows the formatted value. Link opens the value as a URL in a new tab. Badge shows the value as an Atlas badge (add a cell class such as 'badge-success' to color it). Progress shows a numeric value between 0 and 100 as a bar. Image shows the value as an image URL. Sparkline draws a small trend line from a text value with numbers separated by commas or spaces (for example 3,5,4,8,7).</description>
                                     <enumerationValues>
                                         <enumerationValue key="text">Text</enumerationValue>
                                         <enumerationValue key="link">Link</enumerationValue>
                                         <enumerationValue key="badge">Badge</enumerationValue>
                                         <enumerationValue key="progress">Progress bar</enumerationValue>
                                         <enumerationValue key="image">Image</enumerationValue>
+                                        <enumerationValue key="sparkline">Sparkline</enumerationValue>
                                     </enumerationValues>
                                 </property>
                                 <property key="attributeName" type="string" required="false">
@@ -147,12 +148,13 @@
                                 </property>
                                 <property key="filterType" type="enumeration" defaultValue="auto">
                                     <caption>Filter</caption>
-                                    <description>Filter shown in the column menu and as floating filter. Auto picks text, number or date from the attribute type.</description>
+                                    <description>Filter shown in the column menu and as floating filter. Auto picks text, number or date from the attribute type. Set shows a checklist of the distinct values with search, (Select all) and (Blanks); with Server data loading it is used for enumeration and boolean attributes (other types fall back to a text filter).</description>
                                     <enumerationValues>
                                         <enumerationValue key="auto">Auto</enumerationValue>
                                         <enumerationValue key="text">Text</enumerationValue>
                                         <enumerationValue key="number">Number</enumerationValue>
                                         <enumerationValue key="date">Date</enumerationValue>
+                                        <enumerationValue key="set">Set (checkbox list)</enumerationValue>
                                         <enumerationValue key="none">None</enumerationValue>
                                     </enumerationValues>
                                 </property>
@@ -193,7 +195,67 @@
                                         <enumerationValue key="min">Minimum</enumerationValue>
                                         <enumerationValue key="max">Maximum</enumerationValue>
                                         <enumerationValue key="count">Count</enumerationValue>
+                                        <enumerationValue key="distinctCount">Distinct count</enumerationValue>
                                     </enumerationValues>
+                                </property>
+                                <property key="aggregateTop" type="enumeration" defaultValue="same">
+                                    <caption>Top totals row value</caption>
+                                    <description>Only used when Appearance &gt; Totals row is 'Top and bottom': the value shown for this column in the top totals row. 'Same' repeats the Totals row value.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="same">Same as Totals row value</enumerationValue>
+                                        <enumerationValue key="none">None</enumerationValue>
+                                        <enumerationValue key="sum">Sum</enumerationValue>
+                                        <enumerationValue key="avg">Average</enumerationValue>
+                                        <enumerationValue key="min">Minimum</enumerationValue>
+                                        <enumerationValue key="max">Maximum</enumerationValue>
+                                        <enumerationValue key="count">Count</enumerationValue>
+                                        <enumerationValue key="distinctCount">Distinct count</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                            </propertyGroup>
+                            <propertyGroup caption="Pivot">
+                                <property key="pivotRole" type="enumeration" defaultValue="none">
+                                    <caption>Pivot start role</caption>
+                                    <description>Only used when Features &gt; Pivot &gt; Pivot mode is on: the role of this column in the pivot layout the grid starts with. Users change the layout in the side panel.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="none">None</enumerationValue>
+                                        <enumerationValue key="row">Row group</enumerationValue>
+                                        <enumerationValue key="column">Column label</enumerationValue>
+                                        <enumerationValue key="value">Value</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                                <property key="pivotAggregate" type="enumeration" defaultValue="sum">
+                                    <caption>Pivot value function</caption>
+                                    <description>Aggregation used when this column is a pivot value. Sum and average need a number column, minimum and maximum a number or date column; count and distinct count work for every column.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="sum">Sum</enumerationValue>
+                                        <enumerationValue key="avg">Average</enumerationValue>
+                                        <enumerationValue key="count">Count</enumerationValue>
+                                        <enumerationValue key="min">Minimum</enumerationValue>
+                                        <enumerationValue key="max">Maximum</enumerationValue>
+                                        <enumerationValue key="distinctCount">Distinct count</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                                <property key="pivotable" type="boolean" defaultValue="true">
+                                    <caption>Users can pivot on this column</caption>
+                                    <description>Lets users use this column as row group, column label or value in pivot mode. Custom content columns can never be pivoted.</description>
+                                </property>
+                            </propertyGroup>
+                            <propertyGroup caption="Grouping">
+                                <property key="groupIndex" type="integer" defaultValue="0">
+                                    <caption>Group by level</caption>
+                                    <description>Only used when Features &gt; Grouping &gt; Row grouping is on. 0 = the grid is not grouped by this column when it opens; 1, 2 or 3 = grouped by this column at that level (1 is the outermost group). Users can change the grouping with the Group by menu.</description>
+                                </property>
+                                <property key="groupable" type="boolean" defaultValue="true">
+                                    <caption>Users can group by this column</caption>
+                                    <description>Lists the column in the toolbar Group by menu (Features &gt; Grouping). Custom content columns can never be grouped.</description>
+                                </property>
+                            </propertyGroup>
+                            <propertyGroup caption="Validation">
+                                <property key="validation" type="expression" dataSource="../datasource" required="false">
+                                    <caption>Validation</caption>
+                                    <description>Evaluated per row: return an error message when the cell value is invalid, or an empty text when it is valid. Example: if $currentObject/Salary &lt; 0 then 'Salary cannot be negative' else ''. Invalid cells get an error outline and tooltip, and the toolbar shows an issues badge that jumps to the next invalid cell (F8).</description>
+                                    <returnType type="String" />
                                 </property>
                             </propertyGroup>
                         </propertyGroup>
@@ -224,6 +286,24 @@
                                 <property key="autoHeight" type="boolean" defaultValue="false">
                                     <caption>Auto row height</caption>
                                     <description>Rows grow to fit the content of this column.</description>
+                                </property>
+                                <property key="conditionalFormat" type="enumeration" defaultValue="none">
+                                    <caption>Conditional format</caption>
+                                    <description>Spreadsheet-style formatting of number columns, scaled between the lowest and highest loaded value. Data bar: a bar behind the value. Color scale: a background from red (low) over yellow to green (high). Icon set: an up, flat or down arrow for the top, middle and bottom third.</description>
+                                    <enumerationValues>
+                                        <enumerationValue key="none">None</enumerationValue>
+                                        <enumerationValue key="dataBar">Data bar</enumerationValue>
+                                        <enumerationValue key="colorScale">Color scale</enumerationValue>
+                                        <enumerationValue key="iconSet">Icon set</enumerationValue>
+                                    </enumerationValues>
+                                </property>
+                                <property key="formatColor" type="string" required="false">
+                                    <caption>Data bar color</caption>
+                                    <description>CSS color of the data bars, for example #0ea58f. Empty uses the grid accent color.</description>
+                                </property>
+                                <property key="formatReverse" type="boolean" defaultValue="false">
+                                    <caption>Lower is better</caption>
+                                    <description>Reverses the color scale and the icon set, for columns where a low value is good (costs, durations).</description>
                                 </property>
                                 <property key="cellClass" type="expression" dataSource="../datasource" required="false">
                                     <caption>Cell class</caption>
@@ -308,6 +388,18 @@
                         <enumerationValue key="both">Excel and CSV</enumerationValue>
                     </enumerationValues>
                 </property>
+                <property key="exportSheets" type="enumeration" defaultValue="auto">
+                    <caption>Excel sheets</caption>
+                    <description>Data and more: the Data sheet plus a Pivot sheet while the pivot table is shown and a Selection sheet while a cell range is selected. Data only: one sheet, as in version 1.2.</description>
+                    <enumerationValues>
+                        <enumerationValue key="auto">Data and more</enumerationValue>
+                        <enumerationValue key="data">Data only</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="exportStyled" type="boolean" defaultValue="true">
+                    <caption>Styled Excel</caption>
+                    <description>Header fill color, column widths as shown in the grid, frozen pinned columns, the columns' conditional formats as native Excel data bars, color scales and icon sets, and the totals row as SUBTOTAL formulas. Off writes the plain 1.2 layout.</description>
+                </property>
                 <property key="exportFileName" type="string" defaultValue="export">
                     <caption>Export file name</caption>
                     <description>File name without the extension. Also used as the Excel sheet name.</description>
@@ -327,6 +419,14 @@
                 <property key="showSelectionCount" type="boolean" defaultValue="true">
                     <caption>Selection count</caption>
                     <description>Shows how many rows are selected and a button to clear the selection.</description>
+                </property>
+                <property key="showDensityToggle" type="boolean" defaultValue="false">
+                    <caption>Density button</caption>
+                    <description>Adds a toolbar button that switches the rows between compact, normal and comfortable spacing. The choice is remembered with the layout (Remember layout in) and in saved views.</description>
+                </property>
+                <property key="showKeyboardHelp" type="boolean" defaultValue="false">
+                    <caption>Keyboard help button</caption>
+                    <description>Shows a button with a popover that lists the keyboard shortcuts of the grid (also opened with Shift+? while a cell has focus).</description>
                 </property>
             </propertyGroup>
             <propertyGroup caption="Sorting and filtering">
@@ -400,6 +500,14 @@
                     <caption>Flash changed cells</caption>
                     <description>Briefly highlights a cell when its value changes.</description>
                 </property>
+                <property key="clipboardPaste" type="boolean" defaultValue="false">
+                    <caption>Paste from Excel</caption>
+                    <description>Ctrl+V pastes copied cells (for example a block copied from Excel or another grid) into the editable cells, starting at the focused cell and going down and to the right. Values that do not fit a column (text in a number column) are skipped. Ctrl+Z undoes the whole paste.</description>
+                </property>
+                <property key="blockInvalidCommit" type="boolean" defaultValue="false">
+                    <caption>Hold commits while invalid</caption>
+                    <description>With Commit set to 'Commit directly' or 'Run On commit action': a changed object is not committed, and On commit does not run, while one of its cells fails a column Validation expression (or Mendix validation). The held commit runs automatically as soon as the object is valid again.</description>
+                </property>
             </propertyGroup>
             <propertyGroup caption="Columns">
                 <property key="autoSizeStrategy" type="enumeration" defaultValue="none">
@@ -426,6 +534,150 @@
                     <attributeTypes>
                         <attributeType name="String" />
                     </attributeTypes>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Grouping">
+                <property key="enableGrouping" type="boolean" defaultValue="false">
+                    <caption>Row grouping</caption>
+                    <description>Groups rows by the values of one to three columns, with a Group by toolbar menu, collapsible group rows, row counts and the column aggregates (column Totals row value) per group. Set the starting grouping per column with 'Group by level'. Browser data loading only.</description>
+                </property>
+                <property key="groupsExpanded" type="boolean" defaultValue="true">
+                    <caption>Groups start expanded</caption>
+                    <description>Show the rows of every group when the grid opens; off starts with all groups collapsed.</description>
+                </property>
+                <property key="serverGrouping" type="boolean" defaultValue="false">
+                    <caption>Lazy server groups</caption>
+                    <description>Server data loading only: users can group by one enumeration or boolean column. Each group shows its row count (one small request per group) and its rows are loaded page by page from the data source when the group is expanded. Rows inside lazily loaded groups are read-only.</description>
+                </property>
+                <property key="hideGroupedColumns" type="boolean" defaultValue="false">
+                    <caption>Hide grouped columns</caption>
+                    <description>Hides a column while the grid is grouped by it (its value is already shown in the group row).</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Status bar">
+                <property key="showStatusBar" type="boolean" defaultValue="false">
+                    <caption>Status bar</caption>
+                    <description>A bar under the grid with the number of shown, total and selected rows and, for every column with a Totals row value, the sum, average, minimum, maximum or count of the selected rows (of all shown rows when nothing is selected). The numbers update live and count up smoothly.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Pivot">
+                <property key="enablePivot" type="boolean" defaultValue="false">
+                    <caption>Pivot mode</caption>
+                    <description>Browser data loading only. Users switch the grid to a pivot table with the Pivot toolbar button or in the side panel: row groups, column labels and value columns with sum, average, count, minimum, maximum or distinct count, subtotals, a row total column and a grand total row. The pivot follows the filters and the quick search, is kept in saved views and is exported as its own Excel sheet. Set the starting layout per column with 'Pivot start role'.</description>
+                </property>
+                <property key="pivotStartActive" type="boolean" defaultValue="false">
+                    <caption>Start in pivot mode</caption>
+                    <description>Opens the grid as a pivot table with the layout from the columns' 'Pivot start role'.</description>
+                </property>
+                <property key="pivotTotals" type="boolean" defaultValue="true">
+                    <caption>Pivot totals</caption>
+                    <description>Shows a total column per value at the end of the pivot and a grand total row at the bottom.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Tree data">
+                <property key="treeMode" type="enumeration" defaultValue="none">
+                    <caption>Tree data</caption>
+                    <description>Browser data loading only. Shows the rows as a hierarchy. Key and parent key: every row has a key and the key of its parent (for example over an association). Path: every row has a path such as Europe/Norway/Oslo; missing levels are added as summary rows.</description>
+                    <enumerationValues>
+                        <enumerationValue key="none">Off</enumerationValue>
+                        <enumerationValue key="parentKey">Key and parent key</enumerationValue>
+                        <enumerationValue key="path">Path</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="treeKey" type="expression" dataSource="datasource" required="false">
+                    <caption>Key</caption>
+                    <description>Unique key of the row, for example toString($currentObject/Code). Used with 'Key and parent key'.</description>
+                    <returnType type="String" />
+                </property>
+                <property key="treeParentKey" type="expression" dataSource="datasource" required="false">
+                    <caption>Parent key</caption>
+                    <description>Key of the parent row, empty for top-level rows. It can follow an association, for example $currentObject/MyModule.Task_Parent/MyModule.Task/Code. Used with 'Key and parent key'.</description>
+                    <returnType type="String" />
+                </property>
+                <property key="treePath" type="expression" dataSource="datasource" required="false">
+                    <caption>Path</caption>
+                    <description>Path of the row from the top level, the parts separated by the path separator, for example $currentObject/Region + '/' + $currentObject/Country + '/' + $currentObject/City. Used with 'Path'.</description>
+                    <returnType type="String" />
+                </property>
+                <property key="treePathSeparator" type="string" defaultValue="/">
+                    <caption>Path separator</caption>
+                    <description>Text that separates the parts of the path.</description>
+                </property>
+                <property key="treeLabel" type="expression" dataSource="datasource" required="false">
+                    <caption>Label</caption>
+                    <description>Text shown next to the chevron in the tree column. Empty uses the last part of the path, or the key.</description>
+                    <returnType type="String" />
+                </property>
+                <property key="treeExpandDepth" type="integer" defaultValue="1">
+                    <caption>Open levels</caption>
+                    <description>Number of levels that are open when the grid loads: 0 shows only the top level, 1 also shows its children, -1 opens everything.</description>
+                </property>
+                <property key="treeAggregates" type="boolean" defaultValue="false">
+                    <caption>Aggregate per parent</caption>
+                    <description>Parent rows show the column 'Totals row value' (sum, average, ...) of all their descendants instead of their own value. Generated path levels always show the aggregates.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Range selection">
+                <property key="rangeSelection" type="boolean" defaultValue="false">
+                    <caption>Cell range selection</caption>
+                    <description>Users select a block of cells by dragging, with Shift+click or with Shift+arrow keys. Ctrl+C copies the range as tab-separated text (pastes into Excel), and the status bar shows the count, sum and average of the range.</description>
+                </property>
+                <property key="fillHandle" type="boolean" defaultValue="true">
+                    <caption>Fill handle</caption>
+                    <description>A handle at the bottom right of the range copies its values down or right, or continues a linear series (1, 2, 3 or dates). Ctrl+D fills down from the first row of the range. Writes through the normal editing and commit path; one Ctrl+Z undoes the fill.</description>
+                </property>
+                <property key="rangeChart" type="boolean" defaultValue="true">
+                    <caption>Chart range</caption>
+                    <description>A toolbar button (and Alt+F1) that draws a bar, line or pie chart of the selected range: the first text column gives the categories, every number column a series.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Side panel">
+                <property key="showSidePanel" type="boolean" defaultValue="false">
+                    <caption>Side panel</caption>
+                    <description>A toolbar button opens a panel next to the grid with a Columns section (show, hide, reorder, search, and drop zones for row groups, pivot column labels and values) and a Filters section. Whether it is open and which section is shown is kept in saved views.</description>
+                </property>
+                <property key="sidePanelStartOpen" type="boolean" defaultValue="false">
+                    <caption>Start open</caption>
+                    <description>Opens the side panel when the page loads.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Saved views">
+                <property key="showViews" type="boolean" defaultValue="false">
+                    <caption>Views menu</caption>
+                    <description>Shows a Views menu in the toolbar. Users save the current layout (column order, widths, visibility, pinning, sorting, filters and search text) under a name, switch between named views, rename or delete them, and mark one as the default view that opens when the page loads.</description>
+                </property>
+                <property key="viewsAttribute" type="attribute" required="false">
+                    <caption>Views attribute</caption>
+                    <description>Optional String attribute (use unlimited length) of a context object that stores the saved views as JSON, for example on a persistent per-user object so views follow the user across browsers. When empty, the views are kept in the browser's local storage.</description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="viewsKey" type="string" required="false">
+                    <caption>Browser storage key</caption>
+                    <description>Key under which the views are kept in browser local storage when no views attribute is set. Grids with the same key share their views. Leave empty to use the widget name.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Detail rows">
+                <property key="detailContent" type="widgets" dataSource="datasource" required="false">
+                    <caption>Detail content</caption>
+                    <description>Widgets shown in an expandable full-width row under a row, for that row's object. When set, a chevron column expands and collapses the detail row. Browser data loading only.</description>
+                </property>
+                <property key="detailExpandMode" type="enumeration" defaultValue="single">
+                    <caption>Expand</caption>
+                    <description>One row at a time: expanding a row collapses the previously expanded row. Several rows: every row expands independently.</description>
+                    <enumerationValues>
+                        <enumerationValue key="single">One row at a time</enumerationValue>
+                        <enumerationValue key="multiple">Several rows</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="detailStartCollapsed" type="boolean" defaultValue="true">
+                    <caption>Start collapsed</caption>
+                    <description>When off, the first row (one row at a time) or every row (several rows) starts expanded.</description>
+                </property>
+                <property key="detailHeight" type="integer" defaultValue="0">
+                    <caption>Detail height (px)</caption>
+                    <description>Height of a detail row in pixels; taller content scrolls. 0 fits the height of the content.</description>
                 </property>
             </propertyGroup>
             <propertyGroup caption="Row drag">
@@ -515,6 +767,23 @@
                     <caption>Animate rows</caption>
                     <description>Animates rows when sorting, filtering or paging.</description>
                 </property>
+                <property key="animate" type="boolean" defaultValue="true">
+                    <caption>Lively effects</caption>
+                    <description>Skeleton rows while the data loads, a slim progress bar while it refreshes, a highlight on rows that changed after a data refresh, an animated empty state with a Clear filters button, and soft toolbar and menu transitions. Animations are always skipped for users who prefer reduced motion.</description>
+                </property>
+                <property key="motion" type="enumeration" defaultValue="full">
+                    <caption>Motion</caption>
+                    <description>Full: every animation of Lively effects plus count-up numbers and group transitions. Subtle: fades only, without row movement, flashes or count-ups. Off: no animation at all. Users who prefer reduced motion always get Off.</description>
+                    <enumerationValues>
+                        <enumerationValue key="full">Full</enumerationValue>
+                        <enumerationValue key="subtle">Subtle</enumerationValue>
+                        <enumerationValue key="off">Off</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="highlightSearch" type="boolean" defaultValue="true">
+                    <caption>Highlight search matches</caption>
+                    <description>Marks the text that matches the quick search in the visible cells (browsers without the CSS Custom Highlight API simply show no marks).</description>
+                </property>
                 <property key="rowHoverHighlight" type="boolean" defaultValue="true">
                     <caption>Highlight row on hover</caption>
                     <description>Highlights the row under the mouse pointer.</description>
@@ -536,12 +805,17 @@
             <propertyGroup caption="Totals row">
                 <property key="totalsRow" type="enumeration" defaultValue="none">
                     <caption>Totals row</caption>
-                    <description>Shows a pinned row with the values configured per column under 'Totals row value'.</description>
+                    <description>Shows a pinned row with the values configured per column under 'Totals row value'. 'Top and bottom' shows two rows; the top row uses the column 'Top totals row value'. The values always follow the filters and the quick search.</description>
                     <enumerationValues>
                         <enumerationValue key="none">None</enumerationValue>
                         <enumerationValue key="bottom">Pinned at the bottom</enumerationValue>
                         <enumerationValue key="top">Pinned at the top</enumerationValue>
+                        <enumerationValue key="both">Top and bottom</enumerationValue>
                     </enumerationValues>
+                </property>
+                <property key="totalsUserChange" type="boolean" defaultValue="false">
+                    <caption>Users can change totals</caption>
+                    <description>Clicking a totals cell (or Enter on it) opens a menu to show the sum, average, minimum, maximum, count or distinct count of that column, or nothing. The choice is kept with the layout and in saved views. Totals from loaded rows only.</description>
                 </property>
                 <property key="totalsLabel" type="textTemplate" required="false">
                     <caption>Totals label</caption>
@@ -627,6 +901,139 @@
                         <translation lang="en_US">[first] to [last] of [total]</translation>
                     </translations>
                 </property>
+                <property key="labelViews" type="textTemplate" required="false">
+                    <caption>Views button label</caption>
+                    <description>Text of the Views menu button.</description>
+                    <translations>
+                        <translation lang="en_US">Views</translation>
+                    </translations>
+                </property>
+                <property key="labelSaveView" type="textTemplate" required="false">
+                    <caption>Save view label</caption>
+                    <description>Text of the Views menu item that saves the current layout as a new view.</description>
+                    <translations>
+                        <translation lang="en_US">Save current view as...</translation>
+                    </translations>
+                </property>
+                <property key="labelIssues" type="textTemplate" required="false">
+                    <caption>Issues badge text</caption>
+                    <description>Text of the toolbar badge shown while cells fail validation; [count] is replaced by the number of invalid cells.</description>
+                    <translations>
+                        <translation lang="en_US">Issues: [count]</translation>
+                    </translations>
+                </property>
+                <property key="labelShowDetails" type="textTemplate" required="false">
+                    <caption>Show details label</caption>
+                    <description>Accessible label of the chevron button that expands a detail row.</description>
+                    <translations>
+                        <translation lang="en_US">Show details</translation>
+                    </translations>
+                </property>
+                <property key="labelClearFilters" type="textTemplate" required="false">
+                    <caption>Clear filters label</caption>
+                    <description>Text of the button in the animated empty state that clears the filters and the search text.</description>
+                    <translations>
+                        <translation lang="en_US">Clear filters</translation>
+                    </translations>
+                </property>
+                <property key="labelGroupBy" type="textTemplate" required="false">
+                    <caption>Group by label</caption>
+                    <description>Text of the toolbar Group by menu button.</description>
+                    <translations>
+                        <translation lang="en_US">Group by</translation>
+                    </translations>
+                </property>
+                <property key="labelGroupColumn" type="textTemplate" required="false">
+                    <caption>Group column header</caption>
+                    <description>Header of the column that shows the group rows.</description>
+                    <translations>
+                        <translation lang="en_US">Group</translation>
+                    </translations>
+                </property>
+                <property key="labelDensity" type="textTemplate" required="false">
+                    <caption>Density label</caption>
+                    <description>Accessible label of the density toolbar button.</description>
+                    <translations>
+                        <translation lang="en_US">Row density</translation>
+                    </translations>
+                </property>
+                <property key="labelStatusRows" type="textTemplate" required="false">
+                    <caption>Status bar rows text</caption>
+                    <description>Row counter of the status bar; [shown] is replaced by the rows that pass the filters and [total] by all loaded rows.</description>
+                    <translations>
+                        <translation lang="en_US">[shown] of [total] rows</translation>
+                    </translations>
+                </property>
+                <property key="labelSidePanel" type="textTemplate" required="false">
+                    <caption>Side panel label</caption>
+                    <description>Text of the toolbar button that opens the side panel.</description>
+                    <translations>
+                        <translation lang="en_US">Panel</translation>
+                    </translations>
+                </property>
+                <property key="labelPivot" type="textTemplate" required="false">
+                    <caption>Pivot button label</caption>
+                    <description>Text of the toolbar button that switches pivot mode on and off.</description>
+                    <translations>
+                        <translation lang="en_US">Pivot</translation>
+                    </translations>
+                </property>
+                <property key="labelPivotTotal" type="textTemplate" required="false">
+                    <caption>Pivot total label</caption>
+                    <description>Header of the pivot total columns and label of the grand total row.</description>
+                    <translations>
+                        <translation lang="en_US">Total</translation>
+                    </translations>
+                </property>
+                <property key="labelTreeColumn" type="textTemplate" required="false">
+                    <caption>Tree column header</caption>
+                    <description>Header of the column that shows the hierarchy (Tree data).</description>
+                    <translations>
+                        <translation lang="en_US">Hierarchy</translation>
+                    </translations>
+                </property>
+                <property key="labelChartRange" type="textTemplate" required="false">
+                    <caption>Chart range label</caption>
+                    <description>Text of the toolbar button that charts the selected cell range.</description>
+                    <translations>
+                        <translation lang="en_US">Chart range</translation>
+                    </translations>
+                </property>
+                <property key="labelSaveFailed" type="textTemplate" required="false">
+                    <caption>Save failed text</caption>
+                    <description>Message shown when changes could not be saved; [count] is replaced by the number of changes.</description>
+                    <translations>
+                        <translation lang="en_US">[count] change(s) could not be saved.</translation>
+                    </translations>
+                </property>
+                <property key="labelRetry" type="textTemplate" required="false">
+                    <caption>Retry label</caption>
+                    <description>Text of the button that retries failed saves, and of the button that redraws the grid after an error.</description>
+                    <translations>
+                        <translation lang="en_US">Retry</translation>
+                    </translations>
+                </property>
+                <property key="labelDiscard" type="textTemplate" required="false">
+                    <caption>Discard label</caption>
+                    <description>Text of the button that undoes changes that could not be saved.</description>
+                    <translations>
+                        <translation lang="en_US">Discard</translation>
+                    </translations>
+                </property>
+                <property key="labelError" type="textTemplate" required="false">
+                    <caption>Error text</caption>
+                    <description>Message shown instead of the grid when it ran into an unexpected error.</description>
+                    <translations>
+                        <translation lang="en_US">The grid ran into a problem and was stopped.</translation>
+                    </translations>
+                </property>
+                <property key="labelKeyboardHelp" type="textTemplate" required="false">
+                    <caption>Keyboard help label</caption>
+                    <description>Accessible label and title of the keyboard help button and popover.</description>
+                    <translations>
+                        <translation lang="en_US">Keyboard shortcuts</translation>
+                    </translations>
+                </property>
             </propertyGroup>
             <propertyGroup caption="Messages">
                 <property key="noRowsText" type="textTemplate" required="false">
@@ -662,6 +1069,27 @@
                     <actionVariables>
                         <actionVariable key="newValue" type="String" caption="New value" />
                         <actionVariable key="oldValue" type="String" caption="Old value" />
+                    </actionVariables>
+                </property>
+                <property key="onGroupByChange" type="action" required="false">
+                    <caption>On group by change</caption>
+                    <description>Runs after the user changed the grouping. The variable Group by holds the captions of the grouped columns, outermost first, separated by ' > ' (empty when ungrouped).</description>
+                    <actionVariables>
+                        <actionVariable key="groupBy" type="String" caption="Group by" />
+                    </actionVariables>
+                </property>
+                <property key="onPaste" type="action" required="false">
+                    <caption>On paste</caption>
+                    <description>Runs once after a paste (Features &gt; Editing &gt; Paste from Excel) wrote its values. The variable Cell count holds the number of cells that were changed.</description>
+                    <actionVariables>
+                        <actionVariable key="cellCount" type="Integer" caption="Cell count" />
+                    </actionVariables>
+                </property>
+                <property key="onFill" type="action" required="false">
+                    <caption>On fill</caption>
+                    <description>Runs once after the fill handle (or Ctrl+D) wrote its values. The variable Cell count holds the number of cells that were changed.</description>
+                    <actionVariables>
+                        <actionVariable key="cellCount" type="Integer" caption="Cell count" />
                     </actionVariables>
                 </property>
                 <property key="onRowDragEnd" type="action" required="false">

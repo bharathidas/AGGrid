@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AG Grid for Mendix – Free AGGrid Widget with Pivot, Tree Data and Excel Export</title>
+<meta name="description" content="AGGrid brings AG Grid to Mendix: a free, open-source pluggable widget with pivot tables, tree data, row grouping, cell ranges, inline editing and styled Excel export. No AG Grid Enterprise licence needed.">
+<meta name="keywords" content="AG Grid Mendix, Mendix AG Grid, Mendix data grid, Mendix pivot table, Mendix tree grid, Mendix Excel export, Mendix pluggable widget, Data Grid 2 alternative, AGGrid">
+<meta name="author" content="MX Techies">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://bharathidas.github.io/AGGrid/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AGGrid for Mendix">
+<meta property="og:title" content="AG Grid for Mendix – AGGrid pluggable widget 1.1.0">
+<meta property="og:description" content="Pivot tables, tree data, grouping, cell ranges, charts and styled Excel export for Mendix apps. Free and open source, built on AG Grid Community.">
+<meta property="og:url" content="https://bharathidas.github.io/AGGrid/">
+<meta property="og:image" content="https://bharathidas.github.io/AGGrid/images/mendix-ag-grid-overview.png">
+<meta property="og:image:alt" content="AG Grid in a Mendix app with header groups, filters, totals and paging">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AG Grid for Mendix – AGGrid widget">
+<meta name="twitter:description" content="Pivot, tree data, grouping, ranges and Excel export for Mendix. Free, open source, no Enterprise licence.">
+<meta name="twitter:image" content="https://bharathidas.github.io/AGGrid/images/mendix-ag-grid-overview.png">
+<meta name="theme-color" content="#1b5fd9">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "AGGrid – AG Grid for Mendix",
+  "alternateName": ["AG Grid Mendix widget", "Mendix AG Grid"],
+  "description": "A Mendix pluggable widget that brings AG Grid Community to Mendix apps: sorting, filtering, inline editing, pivot tables, tree data, row grouping, cell ranges, charts and styled Excel export.",
+  "applicationCategory": "DeveloperApplication",
+  "applicationSubCategory": "Mendix pluggable widget",
+  "operatingSystem": "Mendix 11 (web)",
+  "softwareVersion": "1.1.0",
+  "datePublished": "2026-09-08",
+  "dateModified": "2026-10-20",
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "url": "https://bharathidas.github.io/AGGrid/",
+  "downloadUrl": "https://github.com/bharathidas/AGGrid/releases/latest",
+  "codeRepository": "https://github.com/bharathidas/AGGrid",
+  "screenshot": "https://bharathidas.github.io/AGGrid/images/mendix-ag-grid-pivot-table.png",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Organization", "name": "MX Techies" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How do I use AG Grid in Mendix?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Install the AGGrid pluggable widget (.mpk) in the widgets folder of your Mendix app, press F4 in Studio Pro, drop AGGrid on a page, choose a data source and add columns. Sorting, filtering, editing and export are Studio Pro properties; no JavaScript is needed." } },
+    { "@type": "Question", "name": "Do I need an AG Grid Enterprise licence?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. AGGrid bundles only AG Grid Community (MIT) and is itself open source under Apache-2.0. Pivot mode, tree data, row grouping, cell ranges, set filters and the styled Excel export are implemented by the widget." } },
+    { "@type": "Question", "name": "Should I use AGGrid or Data Grid 2?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Data Grid 2 is the standard Mendix list grid. Use AGGrid when users need pivot tables, grouping with subtotals, tree data, Excel-like ranges, fill and paste, saved views, conditional formatting or a styled Excel export. Its Atlas theme looks like Data Grid 2." } },
+    { "@type": "Question", "name": "Does AGGrid handle large data sets?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Server data loading pages, sorts and filters on the database like Data Grid 2, so any number of rows works. Browser data loading suits lists up to some thousands of rows." } },
+    { "@type": "Question", "name": "Which Mendix versions does AGGrid support?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Mendix 11.0 and newer, web and responsive profiles." } }
+  ]
+}
+</script>
+<style>
+:root {
+  --bg: #ffffff; --surface: #f5f7fb; --text: #18202e; --muted: #556072; --line: #dfe4ec;
+  --accent: #1b5fd9; --accent-text: #ffffff; --new: #0f7a4a; --new-bg: #e5f5ec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141c; --surface: #171e29; --text: #e8edf5; --muted: #9aa6b8; --line: #2a3443;
+    --accent: #6ea0ff; --accent-text: #0b1220; --new: #6fd3a0; --new-bg: #15301f;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141c; --surface: #171e29; --text: #e8edf5; --muted: #9aa6b8; --line: #2a3443;
+  --accent: #6ea0ff; --accent-text: #0b1220; --new: #6fd3a0; --new-bg: #15301f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--accent); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+header.hero { padding: 56px 0 32px; border-bottom: 1px solid var(--line); }
+.eyebrow { color: var(--muted); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; margin: 0 0 8px; }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.15; margin: 0 0 16px; }
+h2 { font-size: 28px; margin: 56px 0 12px; }
+h3 { font-size: 18px; margin: 0 0 6px; }
+.lead { font-size: 19px; color: var(--muted); max-width: 760px; margin: 0 0 24px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { display: inline-block; padding: 11px 18px; border-radius: 8px; border: 1px solid var(--line); text-decoration: none; font-weight: 600; color: var(--text); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 20px; color: var(--muted); font-size: 14px; }
+figure { margin: 0; }
+img { max-width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--line); }
+.hero-shot { margin-top: 32px; }
+figcaption { color: var(--muted); font-size: 14px; margin-top: 8px; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--new-bg); color: var(--new); margin-bottom: 8px; }
+.gallery { display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+@media (max-width: 520px) { .gallery { grid-template-columns: 1fr; } }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--surface); }
+ol li, ul li { margin: 4px 0; }
+code { background: var(--surface); padding: 1px 6px; border-radius: 4px; font-size: 14px; }
+details { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin: 10px 0; background: var(--surface); }
+summary { font-weight: 600; cursor: pointer; }
+footer { margin: 64px 0 0; padding: 24px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Mendix pluggable widget · Version 1.1.0</p>
+    <h1>AG Grid for Mendix</h1>
+    <p class="lead"><strong>AGGrid</strong> brings AG Grid to Mendix apps: a fast data grid with sorting, filtering,
+      inline editing and Excel export, plus <strong>pivot tables, tree data, row grouping, cell ranges and charts</strong>,
+      all configured in Studio Pro. Free and open source, built on AG Grid Community, so no AG Grid Enterprise licence is needed.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/bharathidas/AGGrid/releases/latest">Download AGGrid 1.1.0 (.mpk)</a>
+      <a class="btn" href="https://marketplace.mendix.com/link/component/305695">Mendix Marketplace</a>
+      <a class="btn" href="https://github.com/bharathidas/AGGrid">Source on GitHub</a>
+    </div>
+    <div class="meta">
+      <span>Mendix 11.0+ · web and responsive</span><span>License: Apache-2.0</span><span>AG Grid Community 36 (MIT)</span>
+    </div>
+    <figure class="hero-shot">
+      <img src="images/mendix-ag-grid-overview.png" width="1788" height="539" alt="AG Grid in a Mendix app: employee grid with header groups, floating filters, progress bars, totals row and paging">
+      <figcaption>AGGrid with the Atlas theme: header groups, Data Grid 2 style filters, a totals row and paging.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<main class="wrap">
+  <section aria-labelledby="new">
+    <h2 id="new">What's new in AGGrid 1.1.0</h2>
+    <p>The enterprise release. Every feature below is new in 1.1.0, optional, and built on the free AG Grid Community edition.</p>
+    <div class="grid">
+      <div class="card"><span class="tag">New</span><h3>Pivot tables</h3><p>Row groups × column labels × values with sum, average, count, min, max and distinct count, subtotals and grand totals; exported as its own Excel sheet.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Row grouping</h3><p>Group by up to three columns with counts and aggregates, or lazy server-side groups that load page by page.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Tree data</h3><p>Hierarchies from a parent key (also over an association) or a path; expand, collapse, aggregate per parent, keep ancestors while filtering.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Cell ranges and fill handle</h3><p>Excel-like range selection, copy as TSV, fill copies or series, Ctrl+D, paste from Excel, one undo step.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Charts from a range</h3><p>Bar, line and pie charts of the selected cells, with legend, tooltips and an accessible data table.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Set filter and side panel</h3><p>Checkbox list filters with search and blanks; a Columns and Filters side panel with drag-and-drop zones.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Saved views</h3><p>Users save named layouts (columns, sorting, filters, grouping, pivot) per user or per browser, with a default view.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Validation and detail rows</h3><p>Validation expressions per column with an issues badge; expandable rows that hold any Mendix widgets.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Conditional formatting</h3><p>Data bars, colour scales, icon sets and sparklines for number columns, also exported as native Excel formats.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Styled Excel export</h3><p>Header fill, column widths, frozen panes, SUBTOTAL totals and extra Pivot and Selection sheets.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Reliability</h3><p>Error boundary with Retry, failed-save banner with Retry and Discard, right-to-left support, 133 unit tests.</p></div>
+      <div class="card"><span class="tag">New</span><h3>Status bar and totals</h3><p>Row counts and aggregates of the selection; top and bottom totals rows that users can change.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="existing">
+    <h2 id="existing">Features already in 1.0.0</h2>
+    <ul>
+      <li><strong>Any Mendix data source</strong> (database, XPath, association, microflow, nanoflow) with Browser or Server data loading.</li>
+      <li>Attribute, dynamic text and <strong>custom content columns</strong> (any widgets per row); render as text, link, badge, progress bar or image.</li>
+      <li>Multi-column <strong>sorting</strong>, <strong>floating filters</strong> with the Data Grid 2 operator menu, <strong>quick search</strong>, pagination.</li>
+      <li><strong>Inline editing</strong> with undo/redo and three commit modes, including an On commit microflow with new value, old value and attribute name.</li>
+      <li>Single and multi <strong>selection</strong> through the Mendix selection API.</li>
+      <li>Column <strong>pinning</strong>, hiding, resizing, reordering, a column chooser and a remembered layout.</li>
+      <li><strong>Row drag</strong> with an order attribute, a <strong>totals row</strong>, <strong>Excel and CSV export</strong>.</li>
+      <li>Atlas (Data Grid 2 look), Quartz, Alpine, Balham and Material themes in light, dark or automatic mode; eleven languages.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="shots">
+    <h2 id="shots">Screenshots</h2>
+    <div class="gallery">
+      <figure><img src="images/mendix-ag-grid-pivot-table.png" width="1788" height="389" loading="lazy" alt="Mendix pivot table: departments by city with summed salary, averaged bonus and total columns"><figcaption>Pivot table with total columns and a grand total row.</figcaption></figure>
+      <figure><img src="images/mendix-ag-grid-pivot-side-panel.png" width="1788" height="691" loading="lazy" alt="Pivot side panel with row groups, column labels and values zones"><figcaption>Side panel: drag columns into row groups, column labels and values.</figcaption></figure>
+      <figure><img src="images/mendix-ag-grid-row-grouping.png" width="1788" height="911" loading="lazy" alt="Row grouping by department with group counts and aggregates in a Mendix data grid"><figcaption>Row grouping with counts and aggregates.</figcaption></figure>
+      <figure><img src="images/mendix-ag-grid-tree-data.png" width="1788" height="1401" loading="lazy" alt="Mendix tree grid with tasks, sub-tasks and summed estimates"><figcaption>Tree data with aggregated estimates per parent.</figcaption></figure>
+      <figure><img src="images/mendix-ag-grid-cell-range-selection.png" width="1788" height="719" loading="lazy" alt="Excel-like cell range selection with fill handle and range sum in the status bar"><figcaption>Cell range with fill handle and range totals in the status bar.</figcaption></figure>
+      <figure><img src="images/mendix-ag-grid-range-chart.png" width="720" height="526" loading="lazy" alt="Bar chart of salaries created from a selected range of grid cells"><figcaption>Chart range: bar, line or pie from the selected cells.</figcaption></figure>
+      <figure><img src="images/mendix-ag-grid-set-filter.png" width="1788" height="732" loading="lazy" alt="Set filter checklist with search and select all on a department column, data bars on salary"><figcaption>Set filter, data bars and top and bottom totals rows.</figcaption></figure>
+      <figure><img src="images/mendix-ag-grid-side-panel.png" width="1788" height="683" loading="lazy" alt="Columns side panel next to the grid with saved views and group by buttons"><figcaption>Saved views, Group by and the columns side panel.</figcaption></figure>
+    </div>
+  </section>
+
+  <section aria-labelledby="compare">
+    <h2 id="compare">AGGrid compared with Data Grid 2</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Capability</th><th>Data Grid 2</th><th>AGGrid 1.1.0</th></tr></thead>
+        <tbody>
+          <tr><td>Sorting, filters, paging, server-side data</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td>Inline editing with undo/redo and commit modes</td><td>Via custom content</td><td>Yes, built in</td></tr>
+          <tr><td>Row grouping with aggregates</td><td>No</td><td>Yes, up to 3 levels, also lazy on the server</td></tr>
+          <tr><td>Pivot table</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Tree data</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Cell ranges, fill handle, paste from Excel</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Charts from selected cells</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Saved views per user</td><td>Personalization of columns</td><td>Named views incl. filters, grouping and pivot</td></tr>
+          <tr><td>Excel export</td><td>Yes</td><td>Styled .xlsx with conditional formats, SUBTOTAL totals, pivot sheet</td></tr>
+          <tr><td>Totals rows, status bar</td><td>No</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="install">
+    <h2 id="install">Install AG Grid in a Mendix app</h2>
+    <ol>
+      <li>Download <code>com.mxtechies.widget.web.AGGrid.mpk</code> from the <a href="https://github.com/bharathidas/AGGrid/releases/latest">latest GitHub release</a> or the <a href="https://marketplace.mendix.com/link/component/305695">Mendix Marketplace</a>.</li>
+      <li>Copy it into the <code>widgets</code> folder of your app and press <strong>F4</strong> in Studio Pro.</li>
+      <li>Drop <strong>AGGrid</strong> (toolbox, Data containers) on a page, choose a data source and add columns.</li>
+      <li>Switch on what you need on the Features tab: quick search, export, grouping, pivot, tree data, ranges, saved views.</li>
+    </ol>
+    <p>Upgrading from 1.0.0: replace the .mpk and press F4. Pages keep their behaviour; only the Excel file is styled by default. See the <a href="https://github.com/bharathidas/AGGrid/blob/main/CHANGELOG.md">changelog</a> and the full <a href="https://github.com/bharathidas/AGGrid#properties">property reference</a>.</p>
+  </section>
+
+  <section aria-labelledby="faq">
+    <h2 id="faq">Frequently asked questions</h2>
+    <details open><summary>How do I use AG Grid in Mendix?</summary><p>Install the AGGrid pluggable widget (.mpk) in the widgets folder of your Mendix app, press F4 in Studio Pro, drop AGGrid on a page, choose a data source and add columns. Sorting, filtering, editing and export are Studio Pro properties; no JavaScript is needed.</p></details>
+    <details><summary>Do I need an AG Grid Enterprise licence?</summary><p>No. AGGrid bundles only AG Grid Community (MIT) and is itself open source under Apache-2.0. Pivot mode, tree data, row grouping, cell ranges, set filters and the styled Excel export are implemented by the widget.</p></details>
+    <details><summary>Should I use AGGrid or Data Grid 2?</summary><p>Data Grid 2 is the standard Mendix list grid. Use AGGrid when users need pivot tables, grouping with subtotals, tree data, Excel-like ranges, fill and paste, saved views, conditional formatting or a styled Excel export. Its Atlas theme looks like Data Grid 2.</p></details>
+    <details><summary>Does AGGrid handle large data sets?</summary><p>Yes. Server data loading pages, sorts and filters on the database like Data Grid 2, so any number of rows works. Browser data loading suits lists up to some thousands of rows.</p></details>
+    <details><summary>Which Mendix versions does AGGrid support?</summary><p>Mendix 11.0 and newer, web and responsive profiles.</p></details>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    AGGrid – AG Grid for Mendix · <a href="https://github.com/bharathidas/AGGrid">GitHub</a> ·
+    <a href="https://github.com/bharathidas/AGGrid/issues">Report an issue</a> ·
+    <a href="https://github.com/bharathidas/AGGridDemo">Demo module</a> · Apache-2.0.
+    AG Grid is a trademark of AG Grid Ltd; this widget is an independent open-source project built on AG Grid Community.
+  </div>
+</footer>
+</body>
+</html>

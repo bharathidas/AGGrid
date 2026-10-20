@@ -139,8 +139,17 @@ export function getPreview(
     })(container({ padding: 4 })(text({ fontColor: palette.text.data })("AGGrid")));
 
     const toolbarButtons: string[] = [];
+    if (values.showViews) {
+        toolbarButtons.push(values.labelViews || "Views");
+    }
+    if (values.enableGrouping && values.dataMode !== "server") {
+        toolbarButtons.push(values.labelGroupBy || "Group by");
+    }
     if (values.showColumnChooser) {
         toolbarButtons.push(values.labelColumns || "Columns");
+    }
+    if (values.showDensityToggle) {
+        toolbarButtons.push("☰");
     }
     if (values.showRefreshButton) {
         toolbarButtons.push(values.labelRefresh || "Refresh");
@@ -306,6 +315,13 @@ export function getPreview(
               ]
             : [];
 
+    // Always offered, so the developer can discover and fill the optional detail row.
+    const detailRow = [
+        rowLayout({ columnSize: "fixed", borders: true })(
+            dropZone(values.detailContent, "Detail row (optional): widgets shown when a row is expanded", modernStudio)
+        )
+    ];
+
     const pager = values.pagination
         ? [
               rowLayout({ columnSize: "fixed", borders: true, padding: 6 })(
@@ -329,6 +345,7 @@ export function getPreview(
         headerRow,
         ...filterRow,
         ...Array.from({ length: values.totalsRow !== "none" ? 4 : 5 }).map(() => dataRow),
+        ...detailRow,
         ...totalsRow,
         ...emptyRow,
         ...pager
@@ -361,9 +378,19 @@ export function getCustomCaption(values: AGGridPreviewProps): string {
 
 export function getProperties(values: AGGridPreviewProps, defaultProperties: Properties): Properties {
     const serverMode = values.dataMode === "server";
+    const treeOn = values.treeMode !== "none" && !serverMode;
+    const pivotOn = values.enablePivot && !serverMode && !treeOn;
 
     values.columns.forEach((column, index) => {
         const hidden: ColumnKey[] = [];
+        if (!pivotOn || column.columnType === "customContent") {
+            hidden.push("pivotRole", "pivotAggregate", "pivotable");
+        } else if (column.pivotRole !== "value") {
+            hidden.push("pivotAggregate");
+        }
+        if (values.totalsRow !== "both" || values.totalsSource === "datasource") {
+            hidden.push("aggregateTop");
+        }
         if (column.columnType !== "attribute") {
             hidden.push(
                 "attribute",
@@ -372,8 +399,18 @@ export function getProperties(values: AGGridPreviewProps, defaultProperties: Pro
                 "onChange",
                 "aggregate",
                 "decimalPrecision",
-                "groupDigits"
+                "groupDigits",
+                "conditionalFormat",
+                "formatColor",
+                "formatReverse"
             );
+        } else if (column.conditionalFormat === "none") {
+            hidden.push("formatColor", "formatReverse");
+        } else if (column.conditionalFormat !== "dataBar") {
+            hidden.push("formatColor");
+        }
+        if (!values.enableGrouping || serverMode || column.columnType === "customContent") {
+            hidden.push("groupIndex", "groupable");
         } else if (!column.editable) {
             hidden.push("attributeName");
         }
@@ -403,6 +440,97 @@ export function getProperties(values: AGGridPreviewProps, defaultProperties: Pro
         hideNestedPropertiesIn(defaultProperties, values, "columns", index, hidden);
     });
 
+    const serverGroups = serverMode && values.serverGrouping;
+    if ((serverMode || !values.enableGrouping || treeOn) && !serverGroups) {
+        hidePropertiesIn(defaultProperties, values, [
+            "groupsExpanded",
+            "hideGroupedColumns",
+            "labelGroupBy",
+            "labelGroupColumn",
+            "onGroupByChange"
+        ]);
+    } else if (serverGroups) {
+        hidePropertiesIn(defaultProperties, values, ["groupsExpanded", "hideGroupedColumns"]);
+    }
+    if (serverMode || treeOn) {
+        hidePropertyIn(defaultProperties, values, "enableGrouping");
+    }
+    if (!serverMode) {
+        hidePropertyIn(defaultProperties, values, "serverGrouping");
+    }
+    // 1.3: pivot, tree data, ranges, side panel, totals and export options only show when they apply.
+    if (serverMode || treeOn) {
+        hidePropertiesIn(defaultProperties, values, [
+            "enablePivot",
+            "pivotStartActive",
+            "pivotTotals",
+            "labelPivot",
+            "labelPivotTotal"
+        ]);
+    } else if (!values.enablePivot) {
+        hidePropertiesIn(defaultProperties, values, [
+            "pivotStartActive",
+            "pivotTotals",
+            "labelPivot",
+            "labelPivotTotal"
+        ]);
+    }
+    if (serverMode) {
+        hidePropertyIn(defaultProperties, values, "treeMode");
+    }
+    if (!treeOn) {
+        hidePropertiesIn(defaultProperties, values, [
+            "treeKey",
+            "treeParentKey",
+            "treePath",
+            "treePathSeparator",
+            "treeLabel",
+            "treeExpandDepth",
+            "treeAggregates",
+            "labelTreeColumn"
+        ]);
+    } else if (values.treeMode === "path") {
+        hidePropertiesIn(defaultProperties, values, ["treeKey", "treeParentKey"]);
+    } else {
+        hidePropertiesIn(defaultProperties, values, ["treePath", "treePathSeparator"]);
+    }
+    if (!values.rangeSelection) {
+        hidePropertiesIn(defaultProperties, values, ["fillHandle", "rangeChart", "labelChartRange", "onFill"]);
+    } else {
+        if (!values.rangeChart) {
+            hidePropertyIn(defaultProperties, values, "labelChartRange");
+        }
+        if (!values.fillHandle) {
+            hidePropertyIn(defaultProperties, values, "onFill");
+        }
+    }
+    if (!values.showSidePanel) {
+        hidePropertiesIn(defaultProperties, values, ["sidePanelStartOpen", "labelSidePanel"]);
+    }
+    if (values.totalsRow === "none" || values.totalsSource === "datasource") {
+        hidePropertyIn(defaultProperties, values, "totalsUserChange");
+    }
+    if (!values.showExportButton || values.exportFormat === "csv") {
+        hidePropertiesIn(defaultProperties, values, ["exportSheets", "exportStyled"]);
+    }
+    if (values.commitMode === "none") {
+        hidePropertiesIn(defaultProperties, values, ["labelSaveFailed", "labelDiscard"]);
+    }
+    if (!values.clipboardPaste) {
+        hidePropertyIn(defaultProperties, values, "onPaste");
+    }
+    if (!values.showDensityToggle) {
+        hidePropertyIn(defaultProperties, values, "labelDensity");
+    }
+    if (!values.showStatusBar) {
+        hidePropertyIn(defaultProperties, values, "labelStatusRows");
+    }
+    if (!values.animate) {
+        hidePropertyIn(defaultProperties, values, "motion");
+    }
+    if (!values.showQuickFilter) {
+        hidePropertyIn(defaultProperties, values, "highlightSearch");
+    }
     if (serverMode) {
         hidePropertiesIn(defaultProperties, values, [
             "rowLimit",
@@ -468,6 +596,34 @@ export function getProperties(values: AGGridPreviewProps, defaultProperties: Pro
     }
     if (values.selection === "None" || !values.showSelectionCount) {
         hidePropertiesIn(defaultProperties, values, ["labelSelected", "labelClearSelection"]);
+    }
+    // Saved views: the attribute and key only matter while the Views menu is on; the key only without attribute.
+    if (!values.showViews) {
+        hidePropertiesIn(defaultProperties, values, ["viewsAttribute", "viewsKey", "labelViews", "labelSaveView"]);
+    } else if (values.viewsAttribute) {
+        hidePropertyIn(defaultProperties, values, "viewsKey");
+    }
+    // Detail rows: the options only matter once detail widgets are placed. The widgets themselves are never
+    // hidden (hiding would reset them).
+    if (values.detailContent.widgetCount === 0) {
+        hidePropertiesIn(defaultProperties, values, [
+            "detailExpandMode",
+            "detailStartCollapsed",
+            "detailHeight",
+            "labelShowDetails"
+        ]);
+    }
+    if (values.commitMode === "none") {
+        hidePropertyIn(defaultProperties, values, "blockInvalidCommit");
+    }
+    if (!values.columns.some(column => column.validation.trim() !== "")) {
+        hidePropertyIn(defaultProperties, values, "labelIssues");
+    }
+    if (!values.showKeyboardHelp) {
+        hidePropertyIn(defaultProperties, values, "labelKeyboardHelp");
+    }
+    if (!values.animate) {
+        hidePropertyIn(defaultProperties, values, "labelClearFilters");
     }
     if (!values.pagination || values.theme !== "atlas") {
         hidePropertiesIn(defaultProperties, values, ["labelPageSize", "labelPagingStatus"]);
@@ -637,6 +793,30 @@ export function check(values: AGGridPreviewProps): Problem[] {
             message: "With server data loading the totals row only covers the rows that are loaded in the browser."
         });
     }
+    const hasDetail = values.detailContent.widgetCount > 0;
+    if (hasDetail && serverMode) {
+        problems.push({
+            property: "detailContent",
+            severity: "warning",
+            message: "Detail rows need Browser data loading; with Server data loading the detail content is not shown."
+        });
+    }
+    if (hasDetail && (values.detailHeight ?? 0) < 0) {
+        problems.push({
+            property: "detailHeight",
+            severity: "error",
+            message: "Detail height cannot be negative; use 0 to fit the content."
+        });
+    }
+    const hasValidation = values.columns.some(column => column.validation.trim() !== "");
+    if (values.blockInvalidCommit && values.commitMode !== "none" && !hasValidation) {
+        problems.push({
+            property: "blockInvalidCommit",
+            severity: "warning",
+            message:
+                "'Hold commits while invalid' only reacts to Mendix validation feedback until a column has a Validation expression."
+        });
+    }
     if (
         values.accentColor.trim() &&
         !/^(#[0-9a-f]{3,8}|[a-z]+|rgba?\(.*\)|hsla?\(.*\))$/i.test(values.accentColor.trim())
@@ -648,5 +828,78 @@ export function check(values: AGGridPreviewProps): Problem[] {
         });
     }
 
+    const treeOn = values.treeMode !== "none" && !serverMode;
+    if (treeOn && values.treeMode === "parentKey" && (!values.treeKey || !values.treeParentKey)) {
+        problems.push({
+            property: values.treeKey ? "treeParentKey" : "treeKey",
+            severity: "error",
+            message: "Tree data 'Key and parent key' needs both the Key and the Parent key expressions."
+        });
+    }
+    if (treeOn && values.treeMode === "path" && !values.treePath) {
+        problems.push({
+            property: "treePath",
+            severity: "error",
+            message: "Tree data 'Path' needs the Path expression."
+        });
+    }
+    if (treeOn && !values.treePathSeparator && values.treeMode === "path") {
+        problems.push({ property: "treePathSeparator", severity: "error", message: "Enter a path separator, e.g. /." });
+    }
+    if (values.treeMode !== "none" && serverMode) {
+        problems.push({
+            property: "treeMode",
+            severity: "warning",
+            message: "Tree data needs Browser data loading; with Server data loading the rows are shown flat."
+        });
+    }
+    if (treeOn && (values.enableGrouping || values.enablePivot)) {
+        problems.push({
+            property: "treeMode",
+            severity: "warning",
+            message: "With tree data on, row grouping and pivot mode are not available."
+        });
+    }
+    if (treeOn && values.detailContent.widgetCount > 0) {
+        problems.push({
+            property: "detailContent",
+            severity: "warning",
+            message: "Detail rows are not shown while tree data is on."
+        });
+    }
+    if (values.enablePivot && !serverMode && !treeOn) {
+        if (values.pivotStartActive && values.columns.every(column => column.pivotRole === "none")) {
+            problems.push({
+                property: "pivotStartActive",
+                severity: "warning",
+                message:
+                    "Start in pivot mode: set 'Pivot start role' on some columns, otherwise the pivot starts empty."
+            });
+        }
+    }
+    if (values.serverGrouping && serverMode && !values.columns.some(column => column.columnType === "attribute")) {
+        problems.push({
+            property: "serverGrouping",
+            severity: "warning",
+            message: "Lazy server groups need an enumeration or boolean attribute column to group by."
+        });
+    }
+    if (values.enableGrouping && !serverMode) {
+        const levels = values.columns.map(column => column.groupIndex ?? 0).filter(level => level > 0);
+        if (levels.some(level => level > 3)) {
+            problems.push({
+                property: "columns",
+                severity: "warning",
+                message: "Group by level can be 1, 2 or 3; higher levels are ignored."
+            });
+        }
+        if (new Set(levels).size !== levels.length) {
+            problems.push({
+                property: "columns",
+                severity: "warning",
+                message: "Two columns use the same Group by level; the leftmost column is grouped first."
+            });
+        }
+    }
     return problems;
 }

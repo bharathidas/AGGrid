@@ -29,20 +29,31 @@ export interface ToolbarProps {
     /** Number of selected rows to announce; 0 hides the counter. */
     selectionCount: number;
     onClearSelection: () => void;
+    /** Rendered next to the search box (for example the validation issues badge). */
+    leading?: ReactNode;
+    /** Rendered after the built-in buttons (for example the keyboard help button). */
+    after?: ReactNode;
+    /** Adds the toolbar transition classes. */
+    animate?: boolean;
     children?: ReactNode;
 }
 
 export function Toolbar(props: ToolbarProps): ReactElement | null {
     const { labels } = props;
     const hasButtons =
-        props.showExportCsv || props.showExportExcel || props.showReset || props.showRefresh || Boolean(props.children);
+        props.showExportCsv ||
+        props.showExportExcel ||
+        props.showReset ||
+        props.showRefresh ||
+        Boolean(props.children) ||
+        Boolean(props.after);
     const hasCounter = props.selectionCount > 0;
-    if (!props.showQuickFilter && !hasButtons && !hasCounter) {
+    if (!props.showQuickFilter && !hasButtons && !hasCounter && !props.leading) {
         return null;
     }
 
     return (
-        <div className="mxt-ag-toolbar">
+        <div className={props.animate ? "mxt-ag-toolbar mxt-ag-toolbar--animate" : "mxt-ag-toolbar"}>
             {props.showQuickFilter && (
                 <input
                     type="search"
@@ -53,6 +64,7 @@ export function Toolbar(props: ToolbarProps): ReactElement | null {
                     onChange={(event: ChangeEvent<HTMLInputElement>) => props.onQuickFilterChange(event.target.value)}
                 />
             )}
+            {props.leading}
             {hasCounter && (
                 <div className="mxt-ag-toolbar__selection" aria-live="polite">
                     <span>{labels.selected.replace("[count]", String(props.selectionCount))}</span>
@@ -103,6 +115,7 @@ export function Toolbar(props: ToolbarProps): ReactElement | null {
                             <span>{labels.exportCsv}</span>
                         </button>
                     )}
+                    {props.after}
                 </div>
             )}
         </div>

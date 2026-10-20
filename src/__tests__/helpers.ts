@@ -82,6 +82,12 @@ export function fakeColumn(overrides: Partial<ColumnsType> = {}): ColumnsType {
         cellClass: undefined,
         onClick: undefined,
         onChange: undefined,
+        groupIndex: 0,
+        groupable: true,
+        conditionalFormat: "none",
+        formatColor: "",
+        formatReverse: false,
+        validation: undefined,
         ...overrides
     } as ColumnsType;
 }
