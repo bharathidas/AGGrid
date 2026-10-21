@@ -11,7 +11,7 @@ needed**.
 
 - **Website and documentation:** https://bharathidas.github.io/AGGrid/
 - **Download:** [latest release (.mpk)](https://github.com/bharathidas/AGGrid/releases/latest) or the
-  [Mendix Marketplace](https://marketplace.mendix.com/link/component/305695)
+  [Mendix Marketplace](https://marketplace.mendix.com/link/component/305695/MxTechies/AG-Grid)
 - **Demo module:** [AGGridDemo](https://github.com/bharathidas/AGGridDemo)
 - Mendix 11.0 or newer, web and responsive profiles · Category: Data containers · License: Apache-2.0
 
@@ -68,7 +68,7 @@ by default, only the Excel file is styled by default.
 
 1. Download `com.mxtechies.widget.web.AGGrid.mpk` from the
    [latest release](https://github.com/bharathidas/AGGrid/releases/latest) or the
-   [Mendix Marketplace](https://marketplace.mendix.com/link/component/305695).
+   [Mendix Marketplace](https://marketplace.mendix.com/link/component/305695/MxTechies/AG-Grid).
 2. Put it in the `widgets` folder of your Mendix app and press **F4** (App > Synchronize App Directory) in Studio Pro.
 3. Find **AGGrid** in the toolbox under *Data containers* and drop it on a page.
 
