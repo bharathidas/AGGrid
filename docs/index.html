@@ -33,7 +33,7 @@
   "operatingSystem": "Mendix 11 (web)",
   "softwareVersion": "1.1.0",
   "datePublished": "2026-09-08",
-  "dateModified": "2026-10-20",
+  "dateModified": "2026-10-30",
   "license": "https://www.apache.org/licenses/LICENSE-2.0",
   "url": "https://bharathidas.github.io/AGGrid/",
   "downloadUrl": "https://github.com/bharathidas/AGGrid/releases/latest",
@@ -57,7 +57,23 @@
     { "@type": "Question", "name": "Does AGGrid handle large data sets?",
       "acceptedAnswer": { "@type": "Answer", "text": "Yes. Server data loading pages, sorts and filters on the database like Data Grid 2, so any number of rows works. Browser data loading suits lists up to some thousands of rows." } },
     { "@type": "Question", "name": "Which Mendix versions does AGGrid support?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Mendix 11.0 and newer, web and responsive profiles." } }
+      "acceptedAnswer": { "@type": "Answer", "text": "Mendix 11.0 and newer, web and responsive profiles." } },
+    { "@type": "Question", "name": "Is AG Grid for Mendix free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. AGGrid is open source under Apache-2.0 and built on AG Grid Community (MIT). It is free for commercial Mendix apps and needs no AG Grid Enterprise licence." } },
+    { "@type": "Question", "name": "Can I build a pivot table in Mendix?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Turn on Pivot on the AGGrid Features tab and give each column a role: row group, column label or value. You get subtotals, total columns and a grand total row, and the pivot is exported as its own Excel sheet." } },
+    { "@type": "Question", "name": "How do I export a Mendix grid to Excel?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Turn on the Export button and choose Excel. AGGrid writes a real .xlsx file with typed numbers and dates, a frozen header, column widths, conditional formats and SUBTOTAL totals. CSV export is available too." } },
+    { "@type": "Question", "name": "How do I show a tree grid in Mendix?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Turn on Tree data and set a Key and Parent key expression (an association path works) or a Path expression. Users expand and collapse rows, and number columns are summed per parent." } },
+    { "@type": "Question", "name": "Why do my inline edits disappear after a refresh?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Edits stay in the browser until they are committed. Set Commit to Commit directly, or run an On commit microflow that commits the object, or add a Save button." } },
+    { "@type": "Question", "name": "How do I freeze columns in a Mendix data grid?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Set Pinned to Left or Right on the column. Row numbers and checkboxes stay pinned next to the frozen columns." } },
+    { "@type": "Question", "name": "Can users save their own grid layout?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Saved views store named layouts with columns, sorting, filters, grouping and pivot, per user in a String attribute or per browser." } },
+    { "@type": "Question", "name": "Does AGGrid work in Mendix native mobile apps?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. AGGrid is for Mendix web and responsive apps." } }
   ]
 }
 </script>
@@ -135,6 +151,19 @@ footer { margin: 64px 0 0; padding: 24px 0 40px; border-top: 1px solid var(--lin
 </header>
 
 <main class="wrap">
+  <section aria-labelledby="usage">
+    <h2 id="usage">What you can build with AG Grid in Mendix</h2>
+    <p>AGGrid is a free Mendix data grid widget for the tables Data Grid 2 can't do on its own. Typical uses:</p>
+    <div class="grid">
+      <div class="card"><h3>Editable data grid</h3><p>Price lists, timesheets, stock counts and planning tables where users type straight into the cells, with undo, redo and an On commit microflow.</p></div>
+      <div class="card"><h3>Pivot tables and reports</h3><p>Sales by region and month, grouped lists with subtotals and grand totals, and charts of selected cells.</p></div>
+      <div class="card"><h3>Tree grid</h3><p>Project plans, bills of material, cost centres and org charts shown as a hierarchy from a parent association.</p></div>
+      <div class="card"><h3>Excel-like data entry</h3><p>Select cell ranges, use the fill handle, paste blocks from Excel and check values before they are saved.</p></div>
+      <div class="card"><h3>Large tables</h3><p>Server-side paging, sorting and filtering, like Data Grid 2, so the grid works with any number of rows.</p></div>
+      <div class="card"><h3>Excel export</h3><p>A real, styled .xlsx file with typed numbers and dates, frozen header and totals, or a plain CSV file.</p></div>
+    </div>
+  </section>
+
   <section aria-labelledby="new">
     <h2 id="new">What's new in AGGrid 1.1.0</h2>
     <p>The enterprise release. Every feature below is new in 1.1.0, optional, and built on the free AG Grid Community edition.</p>
@@ -214,6 +243,17 @@ footer { margin: 64px 0 0; padding: 24px 0 40px; border-top: 1px solid var(--lin
     <p>Upgrading from 1.0.0: replace the .mpk and press F4. Pages keep their behaviour; only the Excel file is styled by default. See the <a href="https://github.com/bharathidas/AGGrid/blob/main/CHANGELOG.md">changelog</a> and the full <a href="https://github.com/bharathidas/AGGrid#properties">property reference</a>.</p>
   </section>
 
+  <section aria-labelledby="limits">
+    <h2 id="limits">Requirements and limitations</h2>
+    <ul>
+      <li>Mendix Studio Pro 11.0 or later, Atlas UI. No other Marketplace modules are needed; AG Grid Community 36 is bundled.</li>
+      <li>Web and responsive apps only, not native mobile.</li>
+      <li>Pivot, grouping, tree data, ranges, side panel and styled Excel are built into the widget on AG Grid Community, so they can behave differently from AG Grid Enterprise.</li>
+      <li>Pivot, tree data, row grouping and detail rows need Browser data loading (lazy server groups excepted). Pivot cells are read-only.</li>
+      <li>In Server data loading, dynamic text and custom content columns can't sort or filter, and totals cover only the loaded rows.</li>
+    </ul>
+  </section>
+
   <section aria-labelledby="faq">
     <h2 id="faq">Frequently asked questions</h2>
     <details open><summary>How do I use AG Grid in Mendix?</summary><p>Install the AGGrid pluggable widget (.mpk) in the widgets folder of your Mendix app, press F4 in Studio Pro, drop AGGrid on a page, choose a data source and add columns. Sorting, filtering, editing and export are Studio Pro properties; no JavaScript is needed.</p></details>
@@ -221,6 +261,14 @@ footer { margin: 64px 0 0; padding: 24px 0 40px; border-top: 1px solid var(--lin
     <details><summary>Should I use AGGrid or Data Grid 2?</summary><p>Data Grid 2 is the standard Mendix list grid. Use AGGrid when users need pivot tables, grouping with subtotals, tree data, Excel-like ranges, fill and paste, saved views, conditional formatting or a styled Excel export. Its Atlas theme looks like Data Grid 2.</p></details>
     <details><summary>Does AGGrid handle large data sets?</summary><p>Yes. Server data loading pages, sorts and filters on the database like Data Grid 2, so any number of rows works. Browser data loading suits lists up to some thousands of rows.</p></details>
     <details><summary>Which Mendix versions does AGGrid support?</summary><p>Mendix 11.0 and newer, web and responsive profiles.</p></details>
+    <details><summary>Is AG Grid for Mendix free?</summary><p>Yes. AGGrid is open source under Apache-2.0 and built on AG Grid Community (MIT). It is free for commercial Mendix apps and needs no AG Grid Enterprise licence.</p></details>
+    <details><summary>Can I build a pivot table in Mendix?</summary><p>Yes. Turn on Pivot on the AGGrid Features tab and give each column a role: row group, column label or value. You get subtotals, total columns and a grand total row, and the pivot is exported as its own Excel sheet.</p></details>
+    <details><summary>How do I export a Mendix grid to Excel?</summary><p>Turn on the Export button and choose Excel. AGGrid writes a real .xlsx file with typed numbers and dates, a frozen header, column widths, conditional formats and SUBTOTAL totals. CSV export is available too.</p></details>
+    <details><summary>How do I show a tree grid in Mendix?</summary><p>Turn on Tree data and set a Key and Parent key expression (an association path works) or a Path expression. Users expand and collapse rows, and number columns are summed per parent.</p></details>
+    <details><summary>Why do my inline edits disappear after a refresh?</summary><p>Edits stay in the browser until they are committed. Set Commit to Commit directly, or run an On commit microflow that commits the object, or add a Save button.</p></details>
+    <details><summary>How do I freeze columns in a Mendix data grid?</summary><p>Set Pinned to Left or Right on the column. Row numbers and checkboxes stay pinned next to the frozen columns.</p></details>
+    <details><summary>Can users save their own grid layout?</summary><p>Yes. Saved views store named layouts with columns, sorting, filters, grouping and pivot, per user in a String attribute or per browser.</p></details>
+    <details><summary>Does AGGrid work in Mendix native mobile apps?</summary><p>No. AGGrid is for Mendix web and responsive apps.</p></details>
   </section>
 </main>
 
